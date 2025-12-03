@@ -4,6 +4,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { useSearchParams } from "react-router-dom";
+import { OAIIcon } from "@/components/OAIIcon";
 
 type AuthMode = "login" | "register" | "forgot-password" | "reset-password";
 
@@ -40,10 +41,10 @@ const Login = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-orange-500 rounded-lg p-3">
-                <span className="text-white font-bold text-2xl">M</span>
+                <OAIIcon className="w-12 h-12" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Mordomo</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Organiza-AI</h1>
             <p className="text-gray-600 mt-2">
               {mode === "login" && "Faça login em sua conta"}
               {mode === "register" && "Crie sua conta"}

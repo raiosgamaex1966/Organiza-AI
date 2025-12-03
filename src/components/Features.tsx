@@ -36,7 +36,7 @@ export const Features = () => {
     },
     {
       icon: MessageCircle,
-      title: "Mordomo no WhatsApp",
+      title: "Organiza-AI no WhatsApp",
       description: "Registre receitas e despesas diretamente pelo WhatsApp. Basta enviar uma mensagem para nosso assistente virtual e ele lançará automaticamente em sua conta.",
       color: "orange"
     }
@@ -51,10 +51,10 @@ export const Features = () => {
             Tudo o que você precisa para controlar suas finanças
           </p>
           <p className="text-gray-500 mt-4">
-            Conheça as principais funcionalidades que tornam o Mordomo a melhor escolha para gerenciar suas finanças pessoais.
+            Conheça as principais funcionalidades que tornam o Organiza-AI a melhor escolha para gerenciar suas finanças pessoais.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <FeatureCard

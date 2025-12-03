@@ -22,6 +22,7 @@ import { useDividas } from "@/hooks/useDividas";
 import { useVeiculos } from "@/hooks/useVeiculos";
 import { useManutencoesPendentes } from "@/hooks/useManutencoesPendentes";
 import { useProfile } from "@/hooks/useProfile";
+import { LembretesWidget } from "@/components/LembretesWidget";
 
 // Função para formatar a data corretamente
 const formatarData = (dataString: string) => {
@@ -302,14 +303,14 @@ const Dashboard = () => {
         percentualDespesas < 80
           ? "good"
           : percentualDespesas < 90
-          ? "warning"
-          : "bad",
+            ? "warning"
+            : "bad",
       badgeStatus:
         percentualDespesas < 80
           ? "Bom"
           : percentualDespesas < 90
-          ? "Regular"
-          : "Ruim",
+            ? "Regular"
+            : "Ruim",
       changeType: "neutral",
       icon: percentualDespesas < 80 ? TrendingUp : TrendingDown,
     },
@@ -370,13 +371,12 @@ const Dashboard = () => {
                   </p>
                   {stat.icon && (
                     <stat.icon
-                      className={`w-4 h-4 ${
-                        stat.changeType === "positive"
+                      className={`w-4 h-4 ${stat.changeType === "positive"
                           ? "text-green-600"
                           : stat.changeType === "negative"
-                          ? "text-red-600"
-                          : "text-gray-600"
-                      }`}
+                            ? "text-red-600"
+                            : "text-gray-600"
+                        }`}
                     />
                   )}
                 </div>
@@ -390,13 +390,12 @@ const Dashboard = () => {
                 )}
                 {stat.change && (
                   <p
-                    className={`text-xs md:text-sm ${
-                      stat.changeType === "positive"
+                    className={`text-xs md:text-sm ${stat.changeType === "positive"
                         ? "text-green-600"
                         : stat.changeType === "negative"
-                        ? "text-red-600"
-                        : "text-gray-600"
-                    }`}
+                          ? "text-red-600"
+                          : "text-gray-600"
+                      }`}
                   >
                     {stat.change}
                   </p>
@@ -407,22 +406,20 @@ const Dashboard = () => {
                       {stat.badge}
                     </span>
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        stat.badgeType === "good"
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${stat.badgeType === "good"
                           ? "bg-green-100 text-green-800"
                           : stat.badgeType === "warning"
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
                     >
                       <div
-                        className={`w-2 h-2 rounded-full mr-1 ${
-                          stat.badgeType === "good"
+                        className={`w-2 h-2 rounded-full mr-1 ${stat.badgeType === "good"
                             ? "bg-green-500"
                             : stat.badgeType === "warning"
-                            ? "bg-orange-500"
-                            : "bg-red-500"
-                        }`}
+                              ? "bg-orange-500"
+                              : "bg-red-500"
+                          }`}
                       ></div>
                       {stat.badgeStatus}
                     </span>
@@ -472,11 +469,10 @@ const Dashboard = () => {
                       {transaction.category}
                     </span>
                     <span
-                      className={`text-sm md:text-base font-bold ${
-                        transaction.type === "income"
+                      className={`text-sm md:text-base font-bold ${transaction.type === "income"
                           ? "text-green-600"
                           : "text-red-600"
-                      }`}
+                        }`}
                     >
                       {transaction.amount}
                     </span>
@@ -527,11 +523,10 @@ const Dashboard = () => {
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        item.status === "sem_estoque"
+                      className={`w-2 h-2 rounded-full ${item.status === "sem_estoque"
                           ? "bg-red-600"
                           : "bg-yellow-500"
-                      }`}
+                        }`}
                     ></div>
                     <div>
                       <p className="text-xs md:text-sm font-medium text-gray-900">
@@ -544,11 +539,10 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      item.status === "sem_estoque"
+                    className={`px-2 py-1 rounded text-xs font-medium ${item.status === "sem_estoque"
                         ? "bg-red-100 text-red-800"
                         : "bg-yellow-100 text-yellow-800"
-                    }`}
+                      }`}
                   >
                     {item.status === "sem_estoque"
                       ? "Sem estoque"
@@ -616,6 +610,9 @@ const Dashboard = () => {
             </div>
           </Card>
         </div>
+
+        {/* Lembretes Widget */}
+        <LembretesWidget />
 
         {/* Veículos Card */}
         <Card className="p-4 md:p-6">

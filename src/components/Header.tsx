@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Menu } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { OAIIcon } from "@/components/OAIIcon";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,11 +14,11 @@ export const Header = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <div className="bg-orange-500 rounded-lg p-2">
-              <span className="text-white font-bold text-xl">M</span>
+              <OAIIcon className="w-8 h-8" />
             </div>
-            <span className="text-2xl font-bold text-gray-800">Mordomo</span>
+            <span className="text-2xl font-bold text-gray-800">Organiza-AI</span>
           </Link>
-          
+
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#recursos" className="text-gray-600 hover:text-orange-500 transition-colors">
               Recursos
@@ -46,7 +47,7 @@ export const Header = () => {
             </Link>
           </div>
 
-          <button 
+          <button
             className="md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >

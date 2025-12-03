@@ -11,6 +11,7 @@ import Mercado from "./pages/Mercado";
 import Veiculos from "./pages/Veiculos";
 import Perfil from "./pages/Perfil";
 import IA from "./pages/IA";
+import Lembretes from "./pages/Lembretes";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -117,6 +118,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <IA />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lembretes"
+            element={
+              <ProtectedRoute>
+                <Lembretes />
               </ProtectedRoute>
             }
           />

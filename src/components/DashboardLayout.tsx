@@ -18,7 +18,9 @@ import {
   ChevronRight,
   Menu,
   X,
+  Bell,
 } from "lucide-react";
+import { OAIIcon } from "@/components/OAIIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,6 +44,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Tag, label: "Categorias", path: "/categorias" },
     { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
     { icon: Target, label: "Metas", path: "/metas" },
+    { icon: Bell, label: "Lembretes", path: "/lembretes" },
     { icon: ShoppingCart, label: "Mercado", path: "/mercado" },
     { icon: Car, label: "Veículos", path: "/veiculos" },
     { icon: Users, label: "Perfil", path: "/perfil" },
@@ -96,10 +99,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div
         className={`
           fixed top-0 left-0 h-screen
-          ${
-            isMobileMenuOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+          ${isMobileMenuOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
           }
           transition-all duration-300
           bg-white border-r border-gray-200 flex flex-col
@@ -112,10 +114,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-orange-500 rounded-lg p-2">
-                <span className="text-white font-bold text-xl">M</span>
+                <OAIIcon className="w-10 h-10" />
               </div>
               {!isCollapsed && (
-                <span className="text-xl font-bold text-gray-800">Mordomo</span>
+                <span className="text-xl font-bold text-gray-800">Organiza-AI</span>
               )}
             </div>
 
@@ -159,11 +161,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 key={item.path}
                 to={item.path}
                 onClick={closeMobileMenu}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-orange-100 text-orange-600"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                } ${isCollapsed ? "justify-center" : "space-x-3"}`}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path
+                  ? "bg-orange-100 text-orange-600"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  } ${isCollapsed ? "justify-center" : "space-x-3"}`}
                 title={isCollapsed ? item.label : undefined}
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -177,9 +178,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <Button
             variant="ghost"
-            className={`w-full text-gray-600 hover:text-gray-900 ${
-              isCollapsed ? "justify-center px-0" : "justify-start"
-            }`}
+            className={`w-full text-gray-600 hover:text-gray-900 ${isCollapsed ? "justify-center px-0" : "justify-start"
+              }`}
             onClick={() => {
               handleLogout();
               closeMobileMenu();
@@ -194,9 +194,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Main Content */}
       <div
-        className={`flex-1 ${
-          isCollapsed ? "lg:ml-20" : "lg:ml-64"
-        } transition-all duration-300`}
+        className={`flex-1 ${isCollapsed ? "lg:ml-20" : "lg:ml-64"
+          } transition-all duration-300`}
       >
         <div className="lg:hidden h-16"></div>{" "}
         {/* Spacer for mobile menu button */}
