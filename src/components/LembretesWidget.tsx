@@ -1,30 +1,19 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Bell, Calendar, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-
-interface Lembrete {
-    id: string;
-    titulo: string;
-    descricao: string;
-    data: string;
-    hora: string;
-    prioridade: "baixa" | "media" | "alta";
-    concluido: boolean;
-}
+import { useLembretes, Lembrete } from "@/hooks/useLembretes";
 
 export const LembretesWidget = () => {
-    const [lembretes, setLembretes] = useState<Lembrete[]>([]);
+    const { lembretes, loading } = useLembretes();
+    const [upcomingLembretes, setUpcomingLembretes] = useState<Lembrete[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const savedLembretes = localStorage.getItem("lembretes");
-        if (savedLembretes) {
-            const allLembretes: Lembrete[] = JSON.parse(savedLembretes);
-
+        if (lembretes.length > 0) {
             // Filtrar apenas lembretes não concluídos e ordenar por data
-            const lembretesAtivos = allLembretes
+            const lembretesAtivos = lembretes
                 .filter((lembrete) => !lembrete.concluido)
                 .sort((a, b) => {
                     const dateA = new Date(`${a.data}T${a.hora || "00:00"}`);
@@ -32,9 +21,11 @@ export const LembretesWidget = () => {
                     return dateA.getTime() - dateB.getTime();
                 });
 
-            setLembretes(lembretesAtivos.slice(0, 3)); // Mostrar apenas os 3 próximos
+            setUpcomingLembretes(lembretesAtivos.slice(0, 3)); // Mostrar apenas os 3 próximos
+        } else {
+            setUpcomingLembretes([]);
         }
-    }, []);
+    }, [lembretes]);
 
     const getPrioridadeColor = (prioridade: string) => {
         switch (prioridade) {
@@ -54,14 +45,24 @@ export const LembretesWidget = () => {
         return data.toLocaleDateString("pt-BR");
     };
 
-    const isProximo = (dataString: string, horaString: string) => {
+    const isProximo = (dataString: string, horaString: string | null) => {
         const agora = new Date();
         const dataLembrete = new Date(`${dataString}T${horaString || "00:00"}`);
         const diferencaHoras = (dataLembrete.getTime() - agora.getTime()) / (1000 * 60 * 60);
         return diferencaHoras <= 24 && diferencaHoras > 0;
     };
 
-    if (lembretes.length === 0) {
+    if (loading) {
+        return (
+            <Card className="p-4 md:p-6 mb-6 md:mb-8">
+                <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+            </Card>
+        );
+    }
+
+    if (upcomingLembretes.length === 0) {
         return null; // Não mostrar o widget se não houver lembretes
     }
 
@@ -81,7 +82,7 @@ export const LembretesWidget = () => {
                 </Button>
             </div>
             <div className="space-y-3">
-                {lembretes.map((lembrete) => (
+                {upcomingLembretes.map((lembrete) => (
                     <div
                         key={lembrete.id}
                         className="flex items-start justify-between p-3 md:p-4 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
