@@ -75,11 +75,24 @@ export const useAuth = () => {
     });
 
     if (error) {
+      // Mensagens de erro mais específicas
+      let errorMessage = error.message;
+
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email ou senha incorretos. Verifique suas credenciais.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
+      } else if (error.message.includes('User not found')) {
+        errorMessage = 'Usuário não encontrado. Você já se cadastrou?';
+      }
+
       toast({
         title: "Erro no login",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
+
+      console.error('Erro de login:', error);
       return { error };
     }
 

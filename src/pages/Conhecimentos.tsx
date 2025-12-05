@@ -12,7 +12,6 @@ import {
     BookOpen,
     Trash2,
     Download,
-    Key,
     Brain,
     Loader2,
 } from "lucide-react";
@@ -47,7 +46,6 @@ const Conhecimentos = () => {
             }
         }
 
-        // Limpar input
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -60,7 +58,7 @@ const Conhecimentos = () => {
         }
 
         await salvarConfig(selectedProvider, apiKey, selectedModel);
-        setApiKey(''); // Limpar campo após salvar
+        setApiKey('');
     };
 
     const handleSearch = async () => {
@@ -78,6 +76,21 @@ const Conhecimentos = () => {
         if (resultado) {
             setResposta(resultado);
         }
+    };
+
+    // Função para baixar a resposta como arquivo de texto
+    const handleDownloadResposta = () => {
+        if (!resposta) return;
+
+        const blob = new Blob([`Pergunta: ${pergunta}\n\n${resposta}`], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `resposta_${new Date().getTime()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     const toggleDocumento = (id: string) => {
@@ -100,32 +113,34 @@ const Conhecimentos = () => {
 
     return (
         <Layout>
-            <div className="p-8">
-                <div className="mb-8">
+            <div className="p-4 sm:p-8">
+                <div className="mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        <BookOpen className="w-8 h-8 text-orange-500" />
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                             Meus Conhecimentos
                         </h1>
                     </div>
-                    <p className="text-gray-600">
+                    <p className="text-sm sm:text-base text-gray-600">
                         Gerencie seus documentos e pesquise usando inteligência artificial
                     </p>
                 </div>
 
                 <Tabs defaultValue="documentos" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="documentos">
-                            <FileText className="w-4 h-4 mr-2" />
-                            Meus Documentos
+                    <TabsList className="grid w-full grid-cols-3 h-auto">
+                        <TabsTrigger value="documentos" className="flex-col gap-1 py-2 px-2">
+                            <FileText className="w-4 h-4" />
+                            <span className="text-xs sm:text-sm">Documentos</span>
                         </TabsTrigger>
-                        <TabsTrigger value="config">
-                            <Settings className="w-4 h-4 mr-2" />
-                            Configurar LLM
+                        <TabsTrigger value="config" className="flex-col gap-1 py-2 px-2">
+                            <Settings className="w-4 h-4" />
+                            <span className="text-xs sm:text-sm text-center leading-tight">
+                                Configurar<br className="sm:hidden" />LLM
+                            </span>
                         </TabsTrigger>
-                        <TabsTrigger value="pesquisar">
-                            <Search className="w-4 h-4 mr-2" />
-                            Pesquisar
+                        <TabsTrigger value="pesquisar" className="flex-col gap-1 py-2 px-2">
+                            <Search className="w-4 h-4" />
+                            <span className="text-xs sm:text-sm">Pesquisar</span>
                         </TabsTrigger>
                     </TabsList>
 
@@ -142,17 +157,17 @@ const Conhecimentos = () => {
                                 <div className="space-y-4">
                                     {/* Botão de Upload */}
                                     <div
-                                        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-500 transition-colors cursor-pointer"
+                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-orange-500 transition-colors cursor-pointer"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                                        <p className="text-sm text-gray-600 mb-2">
+                                        <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-400" />
+                                        <p className="text-xs sm:text-sm text-gray-600 mb-2">
                                             Arraste arquivos aqui ou clique para selecionar
                                         </p>
                                         <p className="text-xs text-gray-500 mb-4">
                                             Suporta: PDF, DOCX, PNG, JPG (máx. 10MB)
                                         </p>
-                                        <Button disabled={loadingDocs}>
+                                        <Button disabled={loadingDocs} size="sm">
                                             {loadingDocs ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -177,7 +192,7 @@ const Conhecimentos = () => {
 
                                     {/* Lista de Documentos */}
                                     <div className="space-y-2">
-                                        <h3 className="font-semibold text-gray-900">
+                                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                                             Documentos ({documentos.length})
                                         </h3>
                                         {documentos.length === 0 ? (
@@ -188,33 +203,35 @@ const Conhecimentos = () => {
                                             documentos.map((doc) => (
                                                 <div
                                                     key={doc.id}
-                                                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                                    className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        <FileText className="w-5 h-5 text-orange-500" />
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">
+                                                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                                                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                                                                 {doc.nome}
                                                             </p>
-                                                            <p className="text-sm text-gray-500">
+                                                            <p className="text-xs sm:text-sm text-gray-500">
                                                                 {formatBytes(doc.tamanho)} • {formatDate(doc.created_at)}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
                                                             onClick={() => baixarDocumento(doc.storage_path, doc.nome)}
                                                         >
-                                                            <Download className="w-4 h-4" />
+                                                            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
                                                             onClick={() => deletarDocumento(doc.id, doc.storage_path)}
                                                         >
-                                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -247,7 +264,7 @@ const Conhecimentos = () => {
                                             setSelectedProvider(provider);
                                             setSelectedModel('');
                                         }}
-                                        className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-900"
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base"
                                     >
                                         <option value="openai">OpenAI (GPT-4, GPT-3.5)</option>
                                         <option value="anthropic">Anthropic (Claude)</option>
@@ -285,7 +302,7 @@ const Conhecimentos = () => {
                                         id="model"
                                         value={selectedModel}
                                         onChange={(e) => setSelectedModel(e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-900"
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base"
                                     >
                                         <option value="">Selecione um modelo</option>
                                         {listarModelos(selectedProvider).map((modelo) => (
@@ -357,10 +374,10 @@ const Conhecimentos = () => {
                                 {/* Input de Pesquisa */}
                                 <div className="space-y-2">
                                     <Label htmlFor="question">Sua Pergunta</Label>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         <Input
                                             id="question"
-                                            placeholder="Ex: Qual é o resumo do relatório anual?"
+                                            placeholder="Ex: Faça um questionário sobre este documento"
                                             value={pergunta}
                                             onChange={(e) => setPergunta(e.target.value)}
                                             className="flex-1"
@@ -369,6 +386,7 @@ const Conhecimentos = () => {
                                         <Button
                                             onClick={handleSearch}
                                             disabled={loadingPesquisa || !config}
+                                            className="w-full sm:w-auto"
                                         >
                                             {loadingPesquisa ? (
                                                 <>
@@ -391,23 +409,35 @@ const Conhecimentos = () => {
                                 </div>
 
                                 {/* Área de Resultados */}
-                                <div className="border border-gray-200 rounded-lg p-6 min-h-[300px] bg-gray-50">
+                                <div className="border border-gray-200 rounded-lg p-4 sm:p-6 min-h-[300px] bg-gray-50">
                                     {resposta ? (
-                                        <div className="prose max-w-none">
-                                            <p className="text-sm font-semibold text-gray-700 mb-2">Resposta:</p>
-                                            <p className="text-gray-900 whitespace-pre-wrap">{resposta}</p>
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-semibold text-gray-700">Resposta:</p>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleDownloadResposta}
+                                                >
+                                                    <Download className="w-4 h-4 mr-2" />
+                                                    Baixar
+                                                </Button>
+                                            </div>
+                                            <div className="prose max-w-none">
+                                                <p className="text-gray-900 whitespace-pre-wrap text-sm sm:text-base">{resposta}</p>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="text-center text-gray-500">
-                                            <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                            <p>Configure sua LLM e faça uma pergunta para começar</p>
+                                            <Brain className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 opacity-50" />
+                                            <p className="text-sm sm:text-base">Configure sua LLM e faça uma pergunta para começar</p>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Histórico */}
                                 <div className="space-y-2">
-                                    <h3 className="font-semibold text-gray-900">
+                                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                                         Histórico de Consultas
                                     </h3>
                                     {consultas.length === 0 ? (
@@ -425,7 +455,7 @@ const Conhecimentos = () => {
                                                         setResposta(consulta.resposta);
                                                     }}
                                                 >
-                                                    <p className="text-sm font-medium text-gray-900">
+                                                    <p className="text-sm font-medium text-gray-900 line-clamp-2">
                                                         {consulta.pergunta}
                                                     </p>
                                                     <p className="text-xs text-gray-500 mt-1">
