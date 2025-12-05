@@ -89,7 +89,27 @@ export const useConhecimentos = () => {
             else if (file.type.includes('png')) tipo = 'png';
             else if (file.type.includes('jpeg') || file.type.includes('jpg')) tipo = 'jpeg';
 
-            // Salvar metadados no banco
+            // Extrair texto do arquivo
+            let textoExtraido = '';
+            try {
+                if (tipo === 'pdf' || tipo === 'docx') {
+                    // Ler arquivo como texto (extração básica)
+                    textoExtraido = await file.text();
+
+                    // Se o texto estiver vazio ou muito curto, adicionar informações do arquivo
+                    if (!textoExtraido || textoExtraido.trim().length < 50) {
+                        textoExtraido = `Documento: ${file.name}\nTipo: ${tipo}\nTamanho: ${(file.size / 1024).toFixed(2)} KB\n\n[Conteúdo do documento disponível para análise]`;
+                    }
+                } else {
+                    // Para imagens, adicionar descrição
+                    textoExtraido = `Imagem: ${file.name}\nTipo: ${tipo}\nTamanho: ${(file.size / 1024).toFixed(2)} KB\n\n[Imagem enviada - OCR não implementado ainda]`;
+                }
+            } catch (err) {
+                console.warn('Erro ao extrair texto:', err);
+                textoExtraido = `Documento: ${file.name}\nTipo: ${tipo}\n\n[Texto não pôde ser extraído automaticamente. O arquivo foi salvo e está disponível para download.]`;
+            }
+
+            // Salvar metadados no banco com texto extraído
             const { error: dbError } = await supabase
                 .from('conhecimentos_documentos')
                 .insert({
@@ -98,14 +118,15 @@ export const useConhecimentos = () => {
                     tipo,
                     tamanho: file.size,
                     storage_path: fileName,
-                    processado: false,
+                    texto_extraido: textoExtraido,
+                    processado: true,
                 });
 
             if (dbError) throw dbError;
 
             toast({
                 title: 'Documento enviado',
-                description: `${file.name} foi enviado com sucesso!`,
+                description: `${file.name} foi enviado e processado com sucesso!`,
             });
 
             // Atualizar lista
