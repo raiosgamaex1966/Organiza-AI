@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   Bell,
+  BookOpen,
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -45,6 +46,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
     { icon: Target, label: "Metas", path: "/metas" },
     { icon: Bell, label: "Lembretes", path: "/lembretes" },
+    { icon: BookOpen, label: "Conhecimentos", path: "/conhecimentos" },
     { icon: ShoppingCart, label: "Mercado", path: "/mercado" },
     { icon: Car, label: "Veículos", path: "/veiculos" },
     { icon: Users, label: "Perfil", path: "/perfil" },
@@ -72,7 +74,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <div className="min-h-screen bg-slate-100 flex relative">
       {/* Mobile Menu Button - Only show when menu is closed */}
       {!isMobileMenuOpen && (
         <div className="lg:hidden fixed top-4 left-4 z-50">

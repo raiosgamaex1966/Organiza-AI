@@ -12,6 +12,7 @@ import Veiculos from "./pages/Veiculos";
 import Perfil from "./pages/Perfil";
 import IA from "./pages/IA";
 import Lembretes from "./pages/Lembretes";
+import Conhecimentos from "./pages/Conhecimentos";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -126,6 +127,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Lembretes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/conhecimentos"
+            element={
+              <ProtectedRoute>
+                <Conhecimentos />
               </ProtectedRoute>
             }
           />
