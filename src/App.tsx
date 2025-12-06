@@ -13,6 +13,7 @@ import Perfil from "./pages/Perfil";
 import IA from "./pages/IA";
 import Lembretes from "./pages/Lembretes";
 import Conhecimentos from "./pages/Conhecimentos";
+import AssistenteOpenAI from "./pages/AssistenteOpenAI";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -135,6 +136,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Conhecimentos />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assistente-openai"
+            element={
+              <ProtectedRoute>
+                <AssistenteOpenAI />
               </ProtectedRoute>
             }
           />

@@ -20,6 +20,7 @@ import {
   X,
   Bell,
   BookOpen,
+  MessageSquare,
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -51,6 +52,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Car, label: "Veículos", path: "/veiculos" },
     { icon: Users, label: "Perfil", path: "/perfil" },
     { icon: Bot, label: "IA", path: "/ia" },
+    { icon: MessageSquare, label: "Assistente IA", path: "/assistente-openai" },
   ];
 
   const handleLogout = () => {
