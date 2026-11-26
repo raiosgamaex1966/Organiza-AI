@@ -69,21 +69,25 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Encaminha eventos para URL externa configurável (ex.: n8n)
+    // Encaminha mensagens para URL externa configurável (ex.: n8n) no formato esperado da Evolution API
     const forwardUrl = (inst.webhook_forward_url || Deno.env.get("N8N_WEBHOOK_URL") || "").trim();
-    if (forwardUrl) {
+    const isMessageEvent = event === "MESSAGES_UPSERT" || event === "MESSAGES.UPSERT";
+    if (forwardUrl && isMessageEvent && payload.data?.key?.remoteJid) {
+      const evoUrl = (Deno.env.get("EVOLUTION_API_URL") || "").trim().replace(/\/+$/, "");
+      const evoKey = (Deno.env.get("EVOLUTION_API_KEY") || "").trim();
+      const forwardPayload = {
+        ...payload,
+        instance: payload.instance || evoInstanceName,
+        server_url: payload.server_url || evoUrl,
+        apikey: payload.apikey || evoKey,
+        user_id: inst.user_id,
+        instance_id: inst.id,
+      };
       try {
         await fetch(forwardUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: inst.user_id,
-            instance_id: inst.id,
-            instance_name: inst.instance_name,
-            evolution_instance_id: inst.evolution_instance_id,
-            event,
-            data: payload.data ?? payload,
-          }),
+          body: JSON.stringify(forwardPayload),
         });
       } catch (fwdErr) {
         console.error("[WEBHOOK] Forward error:", fwdErr);
