@@ -1,0 +1,25 @@
+{
+  "name": "Organiza-AI - Controle Financeiro Inteligente",
+  "short_name": "Organiza-AI",
+  "description": "Gerencie suas finanças de forma simples e inteligente com assistente no WhatsApp.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ]
+}

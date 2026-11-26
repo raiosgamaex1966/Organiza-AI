@@ -22,10 +22,12 @@ import {
   BookOpen,
   MessageSquare,
   Smartphone,
+  ShieldCheck,
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -35,6 +37,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useSubscription();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -55,6 +58,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Bot, label: "IA", path: "/ia" },
     { icon: MessageSquare, label: "Assistente IA", path: "/assistente-openai" },
     { icon: Smartphone, label: "WhatsApp", path: "/whatsapp" },
+    ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin SaaS", path: "/admin" }] : []),
   ];
 
   const handleLogout = () => {

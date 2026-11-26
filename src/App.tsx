@@ -15,6 +15,9 @@ import Lembretes from "./pages/Lembretes";
 import Conhecimentos from "./pages/Conhecimentos";
 import AssistenteOpenAI from "./pages/AssistenteOpenAI";
 import WhatsApp from "./pages/WhatsApp";
+import Index from "./pages/Index";
+import Admin from "./pages/Admin";
+import Assinatura from "./pages/Assinatura";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -26,8 +29,24 @@ function App() {
     <Router>
       <div className="min-h-screen bg-background">
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/assinatura"
+            element={
+              <ProtectedRoute allowInactive>
+                <Assinatura />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

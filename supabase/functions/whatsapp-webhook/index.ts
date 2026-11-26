@@ -452,6 +452,30 @@ Deno.serve(async (req) => {
 
     const userId = await resolveUserId(adminClient, remoteJid, inst.user_id);
 
+    // Verifica se o usuário possui assinatura ativa (ou é admin) antes de processar IA
+    const [{ data: roleRow }, { data: subRow }] = await Promise.all([
+      adminClient.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
+      adminClient.from("subscriptions").select("status, current_period_end").eq("user_id", userId).maybeSingle(),
+    ]);
+    const isAdminUser = !!roleRow;
+    const isSubActive =
+      isAdminUser ||
+      ((subRow?.status === "active" || subRow?.status === "trial") &&
+        (!subRow?.current_period_end || new Date(subRow.current_period_end) > new Date()));
+
+    if (!isSubActive) {
+      await sendWhatsAppText(
+        evoUrl,
+        evoKey,
+        evoInstanceName,
+        remoteJid,
+        "❌ Sua assinatura do Organiza-AI está inativa ou vencida. Acesse o painel para renovar seu plano e continuar registrando pelo WhatsApp."
+      );
+      return new Response(JSON.stringify({ ok: true, blocked: "subscription_inactive" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (parsed.acao === "registrar" && Number(parsed.valor) > 0 && parsed.descricao) {
       const tipo: "receita" | "despesa" = parsed.tipo === "receita" ? "receita" : "despesa";
       const table = tipo === "receita" ? "receitas" : "despesas";
