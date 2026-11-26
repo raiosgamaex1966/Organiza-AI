@@ -51,28 +51,40 @@ async function fetchMediaBase64(
   evoUrl: string,
   evoKey: string,
   instanceName: string,
-  messageData: any
+  messageData: any,
+  innerMsg: any,
+  rootPayload?: any
 ): Promise<string | null> {
   const inline =
+    messageData?.base64 ||
+    rootPayload?.base64 ||
     messageData?.message?.base64 ||
-    messageData?.message?.audioMessage?.base64 ||
-    messageData?.message?.imageMessage?.base64 ||
+    innerMsg?.base64 ||
+    innerMsg?.audioMessage?.base64 ||
+    innerMsg?.imageMessage?.base64 ||
     null;
   if (inline) return inline;
 
   if (!evoUrl || !evoKey) return null;
-  try {
-    const res = await fetch(`${evoUrl}/chat/getBase64FromMediaMessage/${instanceName}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: evoKey },
-      body: JSON.stringify({ message: { key: messageData.key, message: messageData.message } }),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      return json.base64 || null;
+  const endpoints = [
+    `/chat/getBase64FromMediaMessage/${instanceName}`,
+    `/message/getBase64FromMediaMessage/${instanceName}`,
+    `/message/convert/getBase64/${instanceName}`,
+  ];
+  for (const path of endpoints) {
+    try {
+      const res = await fetch(`${evoUrl}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: evoKey },
+        body: JSON.stringify({ message: { key: messageData.key, message: innerMsg || messageData.message } }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.base64) return json.base64;
+      }
+    } catch (e) {
+      console.error(`[MEDIA] Fetch base64 error on ${path}:`, e);
     }
-  } catch (e) {
-    console.error("[MEDIA] Fetch base64 error:", e);
   }
   return null;
 }
@@ -81,19 +93,32 @@ function cleanBase64(raw: string): { b64: string; mime: string } {
   if (raw.includes(",")) {
     const [prefix, b64] = raw.split(",");
     const mime = prefix.split(":")[1]?.split(";")[0] || "application/octet-stream";
-    return { b64, mime };
+    return { b64: b64.replace(/\s/g, ""), mime };
   }
-  return { b64: raw, mime: "application/octet-stream" };
+  return { b64: raw.replace(/\s/g, ""), mime: "application/octet-stream" };
 }
 
-async function transcribeAudioWithOpenAI(b64: string, openAiKey: string): Promise<string | null> {
+async function transcribeAudioWithOpenAI(
+  b64: string,
+  mimeHint: string,
+  openAiKey: string
+): Promise<string | null> {
   try {
     const binary = atob(b64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
+    const ext = mimeHint.includes("mp4") || mimeHint.includes("m4a")
+      ? "m4a"
+      : mimeHint.includes("mpeg") || mimeHint.includes("mp3")
+      ? "mp3"
+      : mimeHint.includes("wav")
+      ? "wav"
+      : "ogg";
+    const mimeType = ext === "ogg" ? "audio/ogg" : `audio/${ext}`;
+
     const form = new FormData();
-    form.append("file", new Blob([bytes], { type: "audio/ogg" }), "audio.ogg");
+    form.append("file", new Blob([bytes], { type: mimeType }), `audio.${ext}`);
     form.append("model", "whisper-1");
     form.append("language", "pt");
 
@@ -103,7 +128,7 @@ async function transcribeAudioWithOpenAI(b64: string, openAiKey: string): Promis
       body: form,
     });
     if (!res.ok) {
-      console.error("[WHISPER] Error:", await res.text());
+      console.error("[WHISPER] Error:", res.status, await res.text());
       return null;
     }
     const json = await res.json();
@@ -379,9 +404,16 @@ Deno.serve(async (req) => {
       });
     }
 
+    const innerMsg =
+      msgData?.message?.ephemeralMessage?.message ||
+      msgData?.message?.viewOnceMessage?.message ||
+      msgData?.message?.viewOnceMessageV2?.message ||
+      msgData?.message ||
+      {};
+
     const textContent: string =
-      msgData?.message?.conversation ||
-      msgData?.message?.extendedTextMessage?.text ||
+      innerMsg?.conversation ||
+      innerMsg?.extendedTextMessage?.text ||
       "";
 
     // Trava anti-loop inteligente: ignora respostas do próprio bot
@@ -407,21 +439,23 @@ Deno.serve(async (req) => {
     const messageType: string = msgData?.messageType || "";
     let aiRawJson: string | null = null;
 
-    if (messageType === "audioMessage" || msgData?.message?.audioMessage) {
-      const rawB64 = await fetchMediaBase64(evoUrl, evoKey, evoInstanceName, msgData);
+    if (messageType === "audioMessage" || innerMsg?.audioMessage) {
+      const rawB64 = await fetchMediaBase64(evoUrl, evoKey, evoInstanceName, msgData, innerMsg, payload);
       if (rawB64) {
-        const { b64 } = cleanBase64(rawB64);
-        const transcript = await transcribeAudioWithOpenAI(b64, openAiKey);
+        const { b64, mime } = cleanBase64(rawB64);
+        const mimeHint = innerMsg?.audioMessage?.mimetype || mime || "audio/ogg";
+        const transcript = await transcribeAudioWithOpenAI(b64, mimeHint, openAiKey);
         if (transcript) {
           aiRawJson = await analyzeTextWithOpenAI(transcript, openAiKey);
         }
       }
-    } else if (messageType === "imageMessage" || msgData?.message?.imageMessage) {
-      const rawB64 = await fetchMediaBase64(evoUrl, evoKey, evoInstanceName, msgData);
+    } else if (messageType === "imageMessage" || innerMsg?.imageMessage) {
+      const rawB64 = await fetchMediaBase64(evoUrl, evoKey, evoInstanceName, msgData, innerMsg, payload);
       if (rawB64) {
         const { b64, mime } = cleanBase64(rawB64);
-        const caption = msgData?.message?.imageMessage?.caption || "";
-        aiRawJson = await analyzeImageWithOpenAI(b64, mime, caption, openAiKey);
+        const mimeHint = innerMsg?.imageMessage?.mimetype || mime || "image/jpeg";
+        const caption = innerMsg?.imageMessage?.caption || "";
+        aiRawJson = await analyzeImageWithOpenAI(b64, mimeHint, caption, openAiKey);
       }
     } else if (textContent.trim()) {
       aiRawJson = await analyzeTextWithOpenAI(textContent.trim(), openAiKey);
