@@ -26,7 +26,6 @@ import {
   Plus,
   CheckCircle,
   Loader2,
-  Webhook,
   Phone,
 } from "lucide-react";
 import { useWhatsAppInstances, WhatsAppInstance } from "@/hooks/useWhatsAppInstances";
@@ -43,7 +42,6 @@ export default function WhatsApp() {
     disconnectInstance,
     deleteInstance,
     checkInstanceStatus,
-    setWebhook,
   } = useWhatsAppInstances();
 
   const [showNewModal, setShowNewModal] = useState(false);
@@ -181,7 +179,7 @@ export default function WhatsApp() {
               Conexão WhatsApp
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              Conecte seu WhatsApp via QR Code (Evolution API) e encaminhe eventos para seu fluxo n8n ou webhook.
+              Conecte seu WhatsApp via QR Code para registrar despesas, receitas, áudios e recibos diretamente por mensagem.
             </p>
           </div>
 
@@ -280,15 +278,6 @@ export default function WhatsApp() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleOpenWebhookModal(inst)}
-                      title="Configurar Webhook (n8n)"
-                    >
-                      <Webhook className="w-3.5 h-3.5" />
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
                       onClick={() => setConfirmDelete(inst)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       title="Excluir instância"
@@ -319,19 +308,6 @@ export default function WhatsApp() {
                 onChange={(e) => setNewName(e.target.value)}
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="webhook-url">URL do Webhook / n8n (opcional)</Label>
-              <Input
-                id="webhook-url"
-                type="url"
-                placeholder="https://seu-n8n.com/webhook/..."
-                value={newWebhookUrl}
-                onChange={(e) => setNewWebhookUrl(e.target.value)}
-              />
-              <p className="text-xs text-gray-500">
-                Se preenchido, os eventos recebidos (mensagens, áudios, recibos) serão encaminhados para essa URL.
-              </p>
             </div>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setShowNewModal(false)}>
