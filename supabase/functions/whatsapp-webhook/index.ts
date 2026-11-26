@@ -72,20 +72,24 @@ async function fetchMediaBase64(
     `/message/convert/getBase64/${instanceName}`,
   ];
   for (const path of endpoints) {
-    try {
-      const res = await fetch(`${evoUrl}${path}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: evoKey },
-        body: JSON.stringify({
-          message: { key: { id: messageData?.key?.id }, message: innerMsg || messageData.message },
-        }),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json?.base64) return json.base64;
+    const payloads = [
+      { message: { key: { id: messageData?.key?.id } } },
+      { message: { key: messageData?.key, message: innerMsg || messageData?.message } },
+    ];
+    for (const bodyObj of payloads) {
+      try {
+        const res = await fetch(`${evoUrl}${path}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: evoKey },
+          body: JSON.stringify(bodyObj),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.base64) return json.base64;
+        }
+      } catch (e) {
+        console.error(`[MEDIA] Fetch base64 error on ${path}:`, e);
       }
-    } catch (e) {
-      console.error(`[MEDIA] Fetch base64 error on ${path}:`, e);
     }
   }
   return null;
@@ -579,7 +583,7 @@ Deno.serve(async (req) => {
         remoteJid,
         "❌ Não consegui processar sua mensagem. Tente enviar em texto, áudio ou foto nítida do recibo."
       );
-      return new Response(JSON.stringify({ ok: true }), {
+      return new Response(JSON.stringify({ ok: true, step: "aiRawJson_null", messageType }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -758,7 +762,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, step: "done", acao: parsed.acao || null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
