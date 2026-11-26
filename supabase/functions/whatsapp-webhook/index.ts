@@ -76,7 +76,9 @@ async function fetchMediaBase64(
       const res = await fetch(`${evoUrl}${path}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", apikey: evoKey },
-        body: JSON.stringify({ message: { key: messageData.key, message: innerMsg || messageData.message } }),
+        body: JSON.stringify({
+          message: { key: { id: messageData?.key?.id }, message: innerMsg || messageData.message },
+        }),
       });
       if (res.ok) {
         const json = await res.json();
@@ -146,9 +148,21 @@ async function analyzeImageWithOpenAI(
   openAiKey: string
 ): Promise<string | null> {
   const finalMime = mime.startsWith("image/") ? mime : "image/jpeg";
-  const prompt = `Você é um analista financeiro. Analise este comprovante/recibo financeiro${
+  const prompt = `Você é um analista financeiro e assistente pessoal. Analise esta imagem/comprovante/lembrete${
     caption ? ` (legenda: "${caption}")` : ""
-  } e responda APENAS com um JSON válido no formato:
+  } e responda APENAS com um JSON válido em UM dos formatos abaixo:
+
+1) Se a legenda pedir lembrete (ex: "lembrete", "adicionar lembrete", "me lembre") OU se a imagem for um compromisso/aviso/boleto para lembrar:
+{
+  "acao": "lembrete",
+  "titulo": "título curto do lembrete",
+  "descricao": "detalhes extras se houver",
+  "data": "YYYY-MM-DD (se não visível, use ${todayISO()})",
+  "hora": "HH:MM (se não visível, use 09:00)",
+  "prioridade": "baixa | media | alta"
+}
+
+2) Caso contrário (nota fiscal, recibo, comprovante PIX, compra ou recebimento):
 {
   "acao": "registrar",
   "tipo": "receita" ou "despesa",
@@ -211,7 +225,20 @@ Analise a mensagem do usuário e responda APENAS com um JSON válido:
 4) Se for uma consulta de saldo ("qual meu saldo", "resumo financeiro"):
 { "acao": "consultar_saldo" }
 
-5) Se não for possível identificar valor/descrição nem consulta:
+5) Se o usuário pedir apenas para adicionar um lembrete SEM informar qual é o lembrete/título (ex: "adicionar lembrete", "criar lembrete", "quero um lembrete"):
+{ "acao": "pedir_lembrete" }
+
+6) Se o usuário informar um lembrete com o assunto/compromisso (ex: "lembrete pagar luz amanhã às 10h", "me lembre de ir ao médico dia 30 às 14:30"):
+{
+  "acao": "lembrete",
+  "titulo": "título curto do lembrete",
+  "descricao": "detalhes extras se houver",
+  "data": "YYYY-MM-DD (se não informada, use ${todayISO()})",
+  "hora": "HH:MM (se não informada, use 09:00)",
+  "prioridade": "baixa | media | alta"
+}
+
+7) Se não for possível identificar valor/descrição, consulta nem lembrete:
 { "acao": "invalido" }
 
 Mensagem: "${text}"`;
@@ -397,7 +424,8 @@ Deno.serve(async (req) => {
     }
 
     const msgData = payload.data;
-    const remoteJid: string = msgData?.key?.remoteJid || "";
+    const rawRemoteJid: string = msgData?.key?.remoteJid || "";
+    const remoteJid: string = msgData?.key?.remoteJidAlt || rawRemoteJid;
     if (!remoteJid || remoteJid.endsWith("@g.us") || remoteJid === "status@broadcast") {
       return new Response(JSON.stringify({ ok: true, ignored: "group/status" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -417,7 +445,10 @@ Deno.serve(async (req) => {
       "";
 
     // Trava anti-loop inteligente: ignora respostas do próprio bot
-    if (BOT_REPLY_PREFIXES.some((prefix) => textContent.trim().startsWith(prefix))) {
+    if (
+      BOT_REPLY_PREFIXES.some((prefix) => textContent.trim().startsWith(prefix)) ||
+      textContent.trim().startsWith("🔔 Qual é o lembrete")
+    ) {
       return new Response(JSON.stringify({ ok: true, ignored: "bot_reply" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -559,6 +590,49 @@ Deno.serve(async (req) => {
           evoInstanceName,
           remoteJid,
           `✅ ${labelTipo} registrada${parcelas > 1 ? ` (${parcelas}x)` : ""}:\n📝 ${parsed.descricao}\n💰 R$ ${formatBRL(valor)}${parcelas > 1 ? " /mês" : ""}\n🏷️ ${categoriaNome}`
+        );
+      }
+    } else if (parsed.acao === "pedir_lembrete") {
+      await sendWhatsAppText(
+        evoUrl,
+        evoKey,
+        evoInstanceName,
+        remoteJid,
+        "🔔 Qual é o lembrete, a data e a hora?\n\nVocê pode responder por *texto*, *áudio* ou enviar uma *imagem* do lembrete (ex.: \"Lembrete: pagar internet dia 30/11 às 10:00\")."
+      );
+    } else if (parsed.acao === "lembrete" && parsed.titulo) {
+      const dataLembrete = parsed.data || todayISO();
+      const horaLembrete = parsed.hora || "09:00";
+      const prioridade = ["baixa", "media", "alta"].includes(parsed.prioridade)
+        ? parsed.prioridade
+        : "media";
+
+      const { error: lembErr } = await adminClient.from("lembretes").insert({
+        user_id: userId,
+        titulo: String(parsed.titulo).trim(),
+        descricao: parsed.descricao ? String(parsed.descricao).trim() : null,
+        data: dataLembrete,
+        hora: horaLembrete,
+        prioridade,
+        concluido: false,
+      });
+
+      if (lembErr) {
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `❌ Erro ao salvar lembrete: ${lembErr.message}`
+        );
+      } else {
+        const [y, m, d] = dataLembrete.split("-");
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `✅ Lembrete agendado:\n🔔 ${parsed.titulo}\n📅 ${d}/${m}/${y} às ${horaLembrete}`
         );
       }
     } else if (parsed.acao === "consultar_despesas") {
