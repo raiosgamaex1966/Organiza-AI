@@ -21,6 +21,7 @@ import {
   Bell,
   BookOpen,
   MessageSquare,
+  Smartphone,
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -53,6 +54,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Users, label: "Perfil", path: "/perfil" },
     { icon: Bot, label: "IA", path: "/ia" },
     { icon: MessageSquare, label: "Assistente IA", path: "/assistente-openai" },
+    { icon: Smartphone, label: "WhatsApp", path: "/whatsapp" },
   ];
 
   const handleLogout = () => {

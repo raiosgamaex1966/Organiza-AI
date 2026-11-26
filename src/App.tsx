@@ -14,6 +14,7 @@ import IA from "./pages/IA";
 import Lembretes from "./pages/Lembretes";
 import Conhecimentos from "./pages/Conhecimentos";
 import AssistenteOpenAI from "./pages/AssistenteOpenAI";
+import WhatsApp from "./pages/WhatsApp";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -144,6 +145,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AssistenteOpenAI />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/whatsapp"
+            element={
+              <ProtectedRoute>
+                <WhatsApp />
               </ProtectedRoute>
             }
           />
