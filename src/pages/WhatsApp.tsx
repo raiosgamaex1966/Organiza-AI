@@ -175,7 +175,7 @@ export default function WhatsApp() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Smartphone className="w-7 h-7 text-orange-500" />
+              <Smartphone className="w-7 h-7 text-emerald-500" />
               Conexão WhatsApp
             </h1>
             <p className="text-sm text-gray-600 mt-1">
@@ -195,7 +195,7 @@ export default function WhatsApp() {
             </Button>
             <Button
               onClick={() => setShowNewModal(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
             >
               <Plus className="w-4 h-4" />
               Nova Conexão
@@ -205,13 +205,13 @@ export default function WhatsApp() {
 
         {!hasFetched && loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
           </div>
         ) : instances.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-14 text-center space-y-4">
-              <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center">
-                <Smartphone className="w-7 h-7 text-orange-500" />
+              <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
+                <Smartphone className="w-7 h-7 text-emerald-500" />
               </div>
               <div className="space-y-1 max-w-md">
                 <h3 className="text-lg font-semibold text-gray-900">Nenhuma conexão WhatsApp</h3>
@@ -221,7 +221,7 @@ export default function WhatsApp() {
               </div>
               <Button
                 onClick={() => setShowNewModal(true)}
-                className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Conectar WhatsApp
@@ -268,7 +268,7 @@ export default function WhatsApp() {
                       <Button
                         size="sm"
                         onClick={() => handleConnect(inst)}
-                        className="flex-1 gap-1.5 bg-orange-500 hover:bg-orange-600 text-white"
+                        className="flex-1 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white"
                       >
                         <QrCode className="w-3.5 h-3.5" />
                         Conectar QR
@@ -316,7 +316,7 @@ export default function WhatsApp() {
               <Button
                 type="submit"
                 disabled={creating}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white"
               >
                 {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Criar e Gerar QR Code
@@ -352,7 +352,7 @@ export default function WhatsApp() {
               </div>
             ) : (
               <div className="w-64 h-64 flex flex-col items-center justify-center border rounded-xl bg-slate-50 gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
                 <span className="text-xs text-gray-500">Gerando QR Code...</span>
               </div>
             )}
@@ -360,7 +360,7 @@ export default function WhatsApp() {
               Abra o WhatsApp no celular → Aparelhos conectados → Conectar aparelho e aponte a câmera.
             </p>
             {polling && (
-              <div className="flex items-center gap-2 text-xs text-orange-600">
+              <div className="flex items-center gap-2 text-xs text-emerald-600">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 Aguardando leitura do QR Code...
               </div>
@@ -381,7 +381,7 @@ export default function WhatsApp() {
             </p>
             <Button
               onClick={() => setShowSuccessModal(null)}
-              className="bg-orange-500 hover:bg-orange-600 text-white w-full"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white w-full"
             >
               Concluir
             </Button>
@@ -416,7 +416,7 @@ export default function WhatsApp() {
               <Button
                 type="submit"
                 disabled={savingWebhook}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white"
               >
                 {savingWebhook ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Salvar Webhook

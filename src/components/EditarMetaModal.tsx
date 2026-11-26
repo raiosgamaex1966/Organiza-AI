@@ -312,7 +312,7 @@ export const EditarMetaModal = ({
             >
               Cancelar
             </Button>
-            <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
+            <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600">
               Salvar Alterações
             </Button>
           </div>

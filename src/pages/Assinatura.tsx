@@ -32,8 +32,8 @@ export default function Assinatura() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="max-w-4xl w-full space-y-6">
         <div className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-orange-600" />
+          <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+            <Lock className="w-6 h-6 text-emerald-600" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {hasAccess ? "Sua Assinatura está Ativa" : "Assinatura Inativa ou Expirada"}
@@ -59,11 +59,11 @@ export default function Assinatura() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {plans.map((plan) => (
-            <Card key={plan.id} className="border-2 hover:border-orange-400 transition-colors">
+            <Card key={plan.id} className="border-2 hover:border-emerald-400 transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{plan.name}</span>
-                  <span className="text-2xl font-bold text-orange-600">
+                  <span className="text-2xl font-bold text-emerald-600">
                     {formatPrice(plan.price_cents)}
                     <span className="text-xs font-normal text-gray-500">
                       /{plan.billing_cycle === "yearly" ? "ano" : "mês"}
@@ -83,7 +83,7 @@ export default function Assinatura() {
                 </ul>
                 <Button
                   onClick={() => handleCheckout(plan.checkout_url)}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white gap-2"
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
                 >
                   Assinar {plan.name}
                   <ExternalLink className="w-4 h-4" />

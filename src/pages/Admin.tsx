@@ -148,7 +148,7 @@ export default function Admin() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <ShieldCheck className="w-7 h-7 text-orange-500" />
+              <ShieldCheck className="w-7 h-7 text-emerald-500" />
               Painel Admin SaaS
             </h1>
             <p className="text-sm text-gray-600 mt-1">
@@ -196,14 +196,14 @@ export default function Admin() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500">Receita Ativa (MRR)</p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-emerald-600">
                   {(estimatedMrrCents / 100).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}
                 </p>
               </div>
-              <DollarSign className="w-7 h-7 text-orange-500" />
+              <DollarSign className="w-7 h-7 text-emerald-500" />
             </CardContent>
           </Card>
         </div>
@@ -277,7 +277,7 @@ export default function Admin() {
                   size="sm"
                   onClick={() => handleSavePlan(plan)}
                   disabled={savingPlan === plan.id}
-                  className="bg-orange-500 hover:bg-orange-600 text-white gap-1.5"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5"
                 >
                   {savingPlan === plan.id ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -308,7 +308,7 @@ export default function Admin() {
           <CardContent className="space-y-3">
             {loading ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
               </div>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-6">Nenhum cliente encontrado.</p>

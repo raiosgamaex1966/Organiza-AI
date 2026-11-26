@@ -32,7 +32,7 @@ export const ProtectedRoute = ({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
       </div>
     );
   }

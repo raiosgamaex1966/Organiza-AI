@@ -70,12 +70,12 @@ export const LembretesWidget = () => {
         <Card className="p-4 md:p-6 mb-6 md:mb-8">
             <div className="flex items-center justify-between mb-4 md:mb-6">
                 <h2 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-orange-500" />
+                    <Bell className="w-5 h-5 text-emerald-500" />
                     Próximos Lembretes
                 </h2>
                 <Button
                     variant="ghost"
-                    className="text-orange-600 hover:text-orange-700 text-sm"
+                    className="text-emerald-600 hover:text-emerald-700 text-sm"
                     onClick={() => navigate("/lembretes")}
                 >
                     Ver todos
@@ -89,8 +89,8 @@ export const LembretesWidget = () => {
                         onClick={() => navigate("/lembretes")}
                     >
                         <div className="flex items-start gap-3 flex-1">
-                            <div className="p-2 rounded-lg bg-orange-100">
-                                <Bell className="w-4 h-4 text-orange-600" />
+                            <div className="p-2 rounded-lg bg-emerald-100">
+                                <Bell className="w-4 h-4 text-emerald-600" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-start justify-between gap-2">
@@ -98,7 +98,7 @@ export const LembretesWidget = () => {
                                         {lembrete.titulo}
                                     </h3>
                                     {isProximo(lembrete.data, lembrete.hora) && (
-                                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 whitespace-nowrap">
+                                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 whitespace-nowrap">
                                             Em breve
                                         </span>
                                     )}

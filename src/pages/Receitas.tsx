@@ -176,7 +176,7 @@ const Receitas = () => {
           </div>
           <Button
             onClick={() => setActiveTab("adicionar")}
-            className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto"
+            className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nova Receita
@@ -220,8 +220,8 @@ const Receitas = () => {
 
           <Card className="p-4 md:p-6">
             <div className="flex items-center space-x-4">
-              <div className="bg-orange-100 rounded-full p-2 md:p-3">
-                <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
+              <div className="bg-emerald-100 rounded-full p-2 md:p-3">
+                <Calendar className="w-5 h-5 md:w-6 md:h-6 text-emerald-600" />
               </div>
               <div>
                 <p className="text-xs md:text-sm text-gray-600">Categorias</p>
@@ -270,7 +270,7 @@ const Receitas = () => {
                     title="Filtrar por categoria"
                     value={categoriaFiltro}
                     onChange={(e) => setCategoriaFiltro(e.target.value)}
-                    className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="">Todas as categorias</option>
                     {categorias.map((categoria) => (
@@ -528,7 +528,7 @@ const Receitas = () => {
                           categoria: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       <option value="">Selecione uma categoria</option>
                       {categoriasReceita.map((categoria) => (
@@ -566,7 +566,7 @@ const Receitas = () => {
                               tipo: e.target.value as "fixa" | "variavel",
                             })
                           }
-                          className="text-orange-600"
+                          className="text-emerald-600"
                         />
                         <span>Receita Fixa</span>
                       </label>
@@ -582,7 +582,7 @@ const Receitas = () => {
                               tipo: e.target.value as "fixa" | "variavel",
                             })
                           }
-                          className="text-orange-600"
+                          className="text-emerald-600"
                         />
                         <span>Receita Variável</span>
                       </label>
@@ -601,7 +601,7 @@ const Receitas = () => {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto"
+                    className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Receita

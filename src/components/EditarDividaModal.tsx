@@ -185,7 +185,7 @@ export const EditarDividaModal = ({ isOpen, onClose, divida, onSave }: EditarDiv
               id="categoria"
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="">Selecione uma categoria</option>
               {categoriasDespesa.map(cat => (
@@ -211,7 +211,7 @@ export const EditarDividaModal = ({ isOpen, onClose, divida, onSave }: EditarDiv
           <Button variant="outline" onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">
+          <Button onClick={handleSave} className="bg-emerald-500 hover:bg-emerald-600">
             Salvar Alterações
           </Button>
         </DialogFooter>

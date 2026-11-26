@@ -150,7 +150,7 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
 
       <Button
         type="submit"
-        className="w-full bg-orange-500 hover:bg-orange-600"
+        className="w-full bg-emerald-500 hover:bg-emerald-600"
         disabled={isLoading}
       >
         {isLoading ? "Criando conta..." : "Criar conta"}
@@ -162,7 +162,7 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
           <button
             type="button"
             onClick={onSwitchToLogin}
-            className="text-orange-600 hover:text-orange-500 font-medium"
+            className="text-emerald-600 hover:text-emerald-500 font-medium"
           >
             Faça login
           </button>

@@ -78,7 +78,7 @@ export const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
         <button
           type="button"
           onClick={onSwitchToForgot}
-          className="text-sm text-orange-600 hover:text-orange-500"
+          className="text-sm text-emerald-600 hover:text-emerald-500"
         >
           Esqueceu a senha?
         </button>
@@ -86,7 +86,7 @@ export const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
 
       <Button
         type="submit"
-        className="w-full bg-orange-500 hover:bg-orange-600"
+        className="w-full bg-emerald-500 hover:bg-emerald-600"
         disabled={isLoading}
       >
         {isLoading ? "Entrando..." : "Entrar"}
@@ -98,7 +98,7 @@ export const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
           <button
             type="button"
             onClick={onSwitchToRegister}
-            className="text-orange-600 hover:text-orange-500 font-medium"
+            className="text-emerald-600 hover:text-emerald-500 font-medium"
           >
             Cadastre-se
           </button>

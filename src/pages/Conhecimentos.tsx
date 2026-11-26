@@ -116,7 +116,7 @@ const Conhecimentos = () => {
             <div className="p-4 sm:p-8">
                 <div className="mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+                        <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-500" />
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                             Meus Conhecimentos
                         </h1>
@@ -157,7 +157,7 @@ const Conhecimentos = () => {
                                 <div className="space-y-4">
                                     {/* Botão de Upload */}
                                     <div
-                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-orange-500 transition-colors cursor-pointer"
+                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-emerald-500 transition-colors cursor-pointer"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
                                         <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-400" />
@@ -206,7 +206,7 @@ const Conhecimentos = () => {
                                                     className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                                                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+                                                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                                                                 {doc.nome}
@@ -402,7 +402,7 @@ const Conhecimentos = () => {
                                         </Button>
                                     </div>
                                     {!config && (
-                                        <p className="text-xs text-orange-600">
+                                        <p className="text-xs text-emerald-600">
                                             Configure sua LLM primeiro na aba "Configurar LLM"
                                         </p>
                                     )}

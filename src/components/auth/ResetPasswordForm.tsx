@@ -133,7 +133,7 @@ export const ResetPasswordForm = ({
 
       <Button
         type="submit"
-        className="w-full bg-orange-500 hover:bg-orange-600"
+        className="w-full bg-emerald-500 hover:bg-emerald-600"
         disabled={isLoading}
       >
         {isLoading ? "Alterando senha..." : "Alterar senha"}
@@ -143,7 +143,7 @@ export const ResetPasswordForm = ({
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-sm text-orange-600 hover:text-orange-500"
+          className="text-sm text-emerald-600 hover:text-emerald-500"
         >
           Voltar para o login
         </button>

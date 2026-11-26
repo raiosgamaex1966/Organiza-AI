@@ -143,7 +143,7 @@ const Perfil = () => {
       <DashboardLayout>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-500"></div>
             <p className="mt-4 text-muted-foreground">Carregando perfil...</p>
           </div>
         </div>
@@ -209,7 +209,7 @@ const Perfil = () => {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Lock className="w-5 h-5 mr-2 text-orange-500" />
+                <Lock className="w-5 h-5 mr-2 text-emerald-500" />
                 Segurança
               </CardTitle>
             </CardHeader>
@@ -238,7 +238,7 @@ const Perfil = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center">
-              <User className="w-5 h-5 mr-2 text-orange-500" />
+              <User className="w-5 h-5 mr-2 text-emerald-500" />
               Informações Pessoais
             </CardTitle>
             {!isEditing ? (
@@ -252,7 +252,7 @@ const Perfil = () => {
               <div className="flex space-x-2">
                 <Button
                   onClick={handleSave}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-emerald-500 hover:bg-emerald-600"
                 >
                   Salvar
                 </Button>
