@@ -161,6 +161,24 @@ export const useReceitas = () => {
 
   useEffect(() => {
     fetchReceitas();
+
+    const channel = supabase
+      .channel("receitas-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "receitas" },
+        () => fetchReceitas()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "transacoes" },
+        () => fetchReceitas()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {

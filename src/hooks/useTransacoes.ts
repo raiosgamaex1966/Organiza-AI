@@ -172,6 +172,29 @@ export const useTransacoes = () => {
 
   useEffect(() => {
     fetchTransacoes();
+
+    const channel = supabase
+      .channel("transacoes-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "transacoes" },
+        () => fetchTransacoes()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "receitas" },
+        () => fetchTransacoes()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "despesas" },
+        () => fetchTransacoes()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Filtros para compatibilidade

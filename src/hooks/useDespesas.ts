@@ -161,6 +161,24 @@ export const useDespesas = () => {
 
   useEffect(() => {
     fetchDespesas();
+
+    const channel = supabase
+      .channel("despesas-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "despesas" },
+        () => fetchDespesas()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "transacoes" },
+        () => fetchDespesas()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {
