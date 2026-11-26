@@ -166,12 +166,13 @@ async function analyzeTextWithOpenAI(text: string, openAiKey: string): Promise<s
   const prompt = `Você é o assistente financeiro do Organiza-AI. Hoje é ${todayISO()}.
 Analise a mensagem do usuário e responda APENAS com um JSON válido:
 
-1) Se for um registro de gasto ou ganho:
+1) Se for um registro de gasto ou ganho (se mencionar parcelado, ex: "em 10x de 200", informe "parcelas": 10 e "valor": 200 como valor de cada parcela):
 {
   "acao": "registrar",
   "tipo": "despesa" ou "receita",
   "descricao": "descrição curta e clara",
   "valor": número (ex: 29.90),
+  "parcelas": número inteiro >= 1 (padrão 1),
   "categoria": "Alimentação | Transporte | Moradia | Saúde | Educação | Lazer | Roupas | Tecnologia | Serviços | Salário | Freelance | Investimentos | Vendas | Aluguel Recebido | Outros",
   "data": "YYYY-MM-DD"
 }
@@ -480,7 +481,8 @@ Deno.serve(async (req) => {
       const tipo: "receita" | "despesa" = parsed.tipo === "receita" ? "receita" : "despesa";
       const table = tipo === "receita" ? "receitas" : "despesas";
       const valor = Math.round(Number(parsed.valor) * 100) / 100;
-      const dataStr = parsed.data || todayISO();
+      const parcelas = Math.min(Math.max(parseInt(parsed.parcelas || "1", 10) || 1, 1), 36);
+      const baseDate = new Date((parsed.data || todayISO()) + "T12:00:00Z");
       const { id: categoriaId, nome: categoriaNome } = await resolveCategoryId(
         adminClient,
         userId,
@@ -488,13 +490,23 @@ Deno.serve(async (req) => {
         parsed.categoria || "Outros"
       );
 
-      const { error: insertErr } = await adminClient.from(table).insert({
-        user_id: userId,
-        categoria_id: categoriaId,
-        descricao: String(parsed.descricao).trim(),
-        valor,
-        data: dataStr,
+      const rowsToInsert = Array.from({ length: parcelas }, (_, idx) => {
+        const d = new Date(baseDate);
+        d.setUTCMonth(d.getUTCMonth() + idx);
+        const desc =
+          parcelas > 1
+            ? `${String(parsed.descricao).trim()} (${idx + 1}/${parcelas})`
+            : String(parsed.descricao).trim();
+        return {
+          user_id: userId,
+          categoria_id: categoriaId,
+          descricao: desc,
+          valor,
+          data: d.toISOString().split("T")[0],
+        };
       });
+
+      const { error: insertErr } = await adminClient.from(table).insert(rowsToInsert);
 
       if (insertErr) {
         console.error("[INSERT] Error:", insertErr);
@@ -512,7 +524,7 @@ Deno.serve(async (req) => {
           evoKey,
           evoInstanceName,
           remoteJid,
-          `✅ ${labelTipo} registrada:\n📝 ${parsed.descricao}\n💰 R$ ${formatBRL(valor)}\n🏷️ ${categoriaNome}`
+          `✅ ${labelTipo} registrada${parcelas > 1 ? ` (${parcelas}x)` : ""}:\n📝 ${parsed.descricao}\n💰 R$ ${formatBRL(valor)}${parcelas > 1 ? " /mês" : ""}\n🏷️ ${categoriaNome}`
         );
       }
     } else if (parsed.acao === "consultar_despesas") {

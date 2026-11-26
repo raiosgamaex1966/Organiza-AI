@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { OAIIcon } from "@/components/OAIIcon";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { InstallPWAButton } from "@/components/InstallPWAButton";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,6 +38,7 @@ export const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center space-x-3">
+            <InstallPWAButton />
             <ThemeToggle />
             <Link to="/login">
               <Button variant="outline" className="border-slate-300 dark:border-slate-700">

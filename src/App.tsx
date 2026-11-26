@@ -1,35 +1,44 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Receitas from "./pages/Receitas";
-import Despesas from "./pages/Despesas";
-import Transacoes from "./pages/Transacoes";
-import Dividas from "./pages/Dividas";
-import Categorias from "./pages/Categorias";
-import Relatorios from "./pages/Relatorios";
-import Metas from "./pages/Metas";
-import Mercado from "./pages/Mercado";
-import Veiculos from "./pages/Veiculos";
-import Perfil from "./pages/Perfil";
-import IA from "./pages/IA";
-import Lembretes from "./pages/Lembretes";
-import Conhecimentos from "./pages/Conhecimentos";
-import AssistenteOpenAI from "./pages/AssistenteOpenAI";
-import WhatsApp from "./pages/WhatsApp";
-import Index from "./pages/Index";
-import Admin from "./pages/Admin";
-import Assinatura from "./pages/Assinatura";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./App.css";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Receitas = lazy(() => import("./pages/Receitas"));
+const Despesas = lazy(() => import("./pages/Despesas"));
+const Transacoes = lazy(() => import("./pages/Transacoes"));
+const Dividas = lazy(() => import("./pages/Dividas"));
+const Categorias = lazy(() => import("./pages/Categorias"));
+const Relatorios = lazy(() => import("./pages/Relatorios"));
+const Metas = lazy(() => import("./pages/Metas"));
+const Mercado = lazy(() => import("./pages/Mercado"));
+const Veiculos = lazy(() => import("./pages/Veiculos"));
+const Perfil = lazy(() => import("./pages/Perfil"));
+const IA = lazy(() => import("./pages/IA"));
+const Lembretes = lazy(() => import("./pages/Lembretes"));
+const Conhecimentos = lazy(() => import("./pages/Conhecimentos"));
+const AssistenteOpenAI = lazy(() => import("./pages/AssistenteOpenAI"));
+const WhatsApp = lazy(() => import("./pages/WhatsApp"));
+const Index = lazy(() => import("./pages/Index"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Assinatura = lazy(() => import("./pages/Assinatura"));
+const Login = lazy(() => import("./pages/Login"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+  </div>
+);
 
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="organiza-ai-theme">
       <Router>
       <div className="min-h-screen bg-background">
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
@@ -179,6 +188,7 @@ function App() {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         <Toaster />
       </div>
     </Router>

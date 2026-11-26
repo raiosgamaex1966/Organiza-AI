@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -30,6 +30,15 @@ export const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
       navigate("/dashboard");
     }
     
+    setIsLoading(false);
+  };
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    const { error } = await signIn("demo@organiza-ai.com", "Demo@Organiza2026!");
+    if (!error) {
+      navigate("/dashboard");
+    }
     setIsLoading(false);
   };
 
@@ -86,10 +95,21 @@ export const LoginForm = ({ onSwitchToRegister, onSwitchToForgot }: LoginFormPro
 
       <Button
         type="submit"
-        className="w-full bg-emerald-500 hover:bg-emerald-600"
+        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
         disabled={isLoading}
       >
         {isLoading ? "Entrando..." : "Entrar"}
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleDemoLogin}
+        disabled={isLoading}
+        className="w-full border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 gap-2"
+      >
+        <Sparkles className="w-4 h-4" />
+        Acessar Conta Demonstração
       </Button>
 
       <div className="text-center">

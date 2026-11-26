@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { playNotificationSound } from "@/lib/sound";
 
 export interface Despesa {
   id: string;
@@ -167,7 +168,10 @@ export const useDespesas = () => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "despesas" },
-        () => fetchDespesas()
+        (payload) => {
+          if (payload.eventType === "INSERT") playNotificationSound("success");
+          fetchDespesas();
+        }
       )
       .on(
         "postgres_changes",

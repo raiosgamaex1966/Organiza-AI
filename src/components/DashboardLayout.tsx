@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { InstallPWAButton } from "@/components/InstallPWAButton";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -200,7 +201,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <LogOut className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && <span className="ml-3">Sair</span>}
           </Button>
-          {!isCollapsed && <ThemeToggle />}
+          {!isCollapsed && (
+            <div className="flex items-center gap-1">
+              <InstallPWAButton compact />
+              <ThemeToggle />
+            </div>
+          )}
         </div>
       </div>
 
