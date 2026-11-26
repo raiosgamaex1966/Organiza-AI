@@ -145,12 +145,25 @@ async function analyzeImageWithOpenAI(
   b64: string,
   mime: string,
   caption: string,
-  openAiKey: string
+  openAiKey: string,
+  forceReminder = false
 ): Promise<string | null> {
   const finalMime = mime.startsWith("image/") ? mime : "image/jpeg";
-  const prompt = `Você é um analista financeiro e assistente pessoal. Analise esta imagem/comprovante/lembrete${
-    caption ? ` (legenda: "${caption}")` : ""
-  } e responda APENAS com um JSON válido em UM dos formatos abaixo:
+  const prompt = forceReminder
+    ? `O usuário pediu para ADICIONAR UM LEMBRETE a partir desta imagem${
+        caption ? ` (legenda: "${caption}")` : ""
+      }. Extraia o compromisso, conta, aviso ou texto principal da imagem e responda APENAS com um JSON válido:
+{
+  "acao": "lembrete",
+  "titulo": "título curto e claro do lembrete",
+  "descricao": "detalhes extras visíveis na imagem",
+  "data": "YYYY-MM-DD (se não visível, use ${todayISO()})",
+  "hora": "HH:MM (se não visível, use 09:00)",
+  "prioridade": "baixa | media | alta"
+}`
+    : `Você é um analista financeiro e assistente pessoal. Analise esta imagem/comprovante/lembrete${
+        caption ? ` (legenda: "${caption}")` : ""
+      } e responda APENAS com um JSON válido em UM dos formatos abaixo:
 
 1) Se a legenda pedir lembrete (ex: "lembrete", "adicionar lembrete", "me lembre") OU se a imagem for um compromisso/aviso/boleto para lembrar:
 {
@@ -201,8 +214,24 @@ async function analyzeImageWithOpenAI(
   return json.choices?.[0]?.message?.content || null;
 }
 
-async function analyzeTextWithOpenAI(text: string, openAiKey: string): Promise<string | null> {
-  const prompt = `Você é o assistente financeiro do Organiza-AI. Hoje é ${todayISO()}.
+async function analyzeTextWithOpenAI(
+  text: string,
+  openAiKey: string,
+  forceReminder = false
+): Promise<string | null> {
+  const prompt = forceReminder
+    ? `O usuário está respondendo com os dados de um LEMBRETE. Hoje é ${todayISO()}.
+Extraia o lembrete da mensagem e responda APENAS com um JSON válido:
+{
+  "acao": "lembrete",
+  "titulo": "título curto do lembrete",
+  "descricao": "detalhes extras se houver",
+  "data": "YYYY-MM-DD (se não informada, use ${todayISO()})",
+  "hora": "HH:MM (se não informada, use 09:00)",
+  "prioridade": "baixa | media | alta"
+}
+Mensagem: "${text}"`
+    : `Você é o assistente financeiro do Organiza-AI. Hoje é ${todayISO()}.
 Analise a mensagem do usuário e responda APENAS com um JSON válido:
 
 1) Se for um registro de gasto ou ganho (se mencionar parcelado, ex: "em 10x de 200", informe "parcelas": 10 e "valor": 200 como valor de cada parcela):
@@ -467,6 +496,44 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Verifica estado pendente (ex.: usuário digitou "adicionar lembrete" na mensagem anterior)
+    const { data: pendingState } = await adminClient
+      .from("whatsapp_conversation_state")
+      .select("pending_action, expires_at")
+      .eq("phone", remoteJid)
+      .maybeSingle();
+
+    const forceReminder =
+      pendingState?.pending_action === "lembrete" &&
+      new Date(pendingState.expires_at) > new Date();
+
+    if (pendingState) {
+      await adminClient.from("whatsapp_conversation_state").delete().eq("phone", remoteJid);
+    }
+
+    // Atalho determinístico se o usuário só pediu "adicionar lembrete"
+    const normalizedText = textContent.trim().toLowerCase().replace(/[!?.]/g, "");
+    if (
+      !forceReminder &&
+      ["adicionar lembrete", "criar lembrete", "novo lembrete", "lembrete"].includes(normalizedText)
+    ) {
+      await adminClient.from("whatsapp_conversation_state").upsert({
+        phone: remoteJid,
+        pending_action: "lembrete",
+        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      });
+      await sendWhatsAppText(
+        evoUrl,
+        evoKey,
+        evoInstanceName,
+        remoteJid,
+        "🔔 Qual é o lembrete, a data e a hora?\n\nVocê pode responder por *texto*, *áudio* ou enviar uma *imagem* do lembrete (ex.: \"Lembrete: pagar internet dia 30/11 às 10:00\")."
+      );
+      return new Response(JSON.stringify({ ok: true, awaiting: "lembrete" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const messageType: string = msgData?.messageType || "";
     let aiRawJson: string | null = null;
 
@@ -477,7 +544,15 @@ Deno.serve(async (req) => {
         const mimeHint = innerMsg?.audioMessage?.mimetype || mime || "audio/ogg";
         const transcript = await transcribeAudioWithOpenAI(b64, mimeHint, openAiKey);
         if (transcript) {
-          aiRawJson = await analyzeTextWithOpenAI(transcript, openAiKey);
+          const normTranscript = transcript.trim().toLowerCase().replace(/[!?.]/g, "");
+          if (
+            !forceReminder &&
+            ["adicionar lembrete", "criar lembrete", "novo lembrete", "lembrete"].includes(normTranscript)
+          ) {
+            aiRawJson = JSON.stringify({ acao: "pedir_lembrete" });
+          } else {
+            aiRawJson = await analyzeTextWithOpenAI(transcript, openAiKey, forceReminder);
+          }
         }
       }
     } else if (messageType === "imageMessage" || innerMsg?.imageMessage) {
@@ -486,10 +561,10 @@ Deno.serve(async (req) => {
         const { b64, mime } = cleanBase64(rawB64);
         const mimeHint = innerMsg?.imageMessage?.mimetype || mime || "image/jpeg";
         const caption = innerMsg?.imageMessage?.caption || "";
-        aiRawJson = await analyzeImageWithOpenAI(b64, mimeHint, caption, openAiKey);
+        aiRawJson = await analyzeImageWithOpenAI(b64, mimeHint, caption, openAiKey, forceReminder);
       }
     } else if (textContent.trim()) {
-      aiRawJson = await analyzeTextWithOpenAI(textContent.trim(), openAiKey);
+      aiRawJson = await analyzeTextWithOpenAI(textContent.trim(), openAiKey, forceReminder);
     } else {
       return new Response(JSON.stringify({ ok: true, ignored: "unsupported_empty" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -593,6 +668,11 @@ Deno.serve(async (req) => {
         );
       }
     } else if (parsed.acao === "pedir_lembrete") {
+      await adminClient.from("whatsapp_conversation_state").upsert({
+        phone: remoteJid,
+        pending_action: "lembrete",
+        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      });
       await sendWhatsAppText(
         evoUrl,
         evoKey,
