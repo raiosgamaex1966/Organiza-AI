@@ -25,6 +25,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -82,7 +83,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex relative">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex relative transition-colors">
       {/* Mobile Menu Button - Only show when menu is closed */}
       {!isMobileMenuOpen && (
         <div className="lg:hidden fixed top-4 left-4 z-50">
@@ -114,20 +115,20 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             : "-translate-x-full lg:translate-x-0"
           }
           transition-all duration-300
-          bg-white border-r border-gray-200 flex flex-col
+          bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col
           z-40
           ${isCollapsed ? "w-20" : "w-64"}
         `}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-gray-200 flex-shrink-0">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-orange-500 rounded-lg p-2">
+              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg p-2">
                 <OAIIcon className="w-10 h-10" />
               </div>
               {!isCollapsed && (
-                <span className="text-xl font-bold text-gray-800">Organiza-AI</span>
+                <span className="text-xl font-bold text-slate-800 dark:text-white">Organiza-AI</span>
               )}
             </div>
 
@@ -172,8 +173,8 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 to={item.path}
                 onClick={closeMobileMenu}
                 className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path
-                  ? "bg-orange-100 text-orange-600"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                   } ${isCollapsed ? "justify-center" : "space-x-3"}`}
                 title={isCollapsed ? item.label : undefined}
               >
@@ -184,11 +185,11 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
         </nav>
 
-        {/* Logout */}
-        <div className="p-4 border-t border-gray-200 flex-shrink-0">
+        {/* Theme & Logout */}
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex-shrink-0 flex items-center justify-between gap-2">
           <Button
             variant="ghost"
-            className={`w-full text-gray-600 hover:text-gray-900 ${isCollapsed ? "justify-center px-0" : "justify-start"
+            className={`flex-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white ${isCollapsed ? "justify-center px-0" : "justify-start"
               }`}
             onClick={() => {
               handleLogout();
@@ -199,6 +200,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <LogOut className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && <span className="ml-3">Sair</span>}
           </Button>
+          {!isCollapsed && <ThemeToggle />}
         </div>
       </div>
 

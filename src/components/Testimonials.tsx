@@ -28,25 +28,25 @@ export const Testimonials = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-slate-50 dark:bg-slate-950 transition-colors">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">O QUE DIZEM NOSSOS USUÁRIOS</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">O QUE DIZEM NOSSOS USUÁRIOS</h2>
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
             Milhares de pessoas já transformaram suas finanças com o Organiza-AI
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card key={index} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                    <Star key={i} className="w-5 h-5 text-amber-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-600 mb-6 leading-relaxed">"{testimonial.content}"</p>
+                <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">"{testimonial.content}"</p>
                 <div className="flex items-center">
                   <img
                     src={testimonial.avatar}
@@ -54,8 +54,8 @@ export const Testimonials = () => {
                     className="w-12 h-12 rounded-full mr-4"
                   />
                   <div>
-                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                    <h4 className="font-bold text-slate-900 dark:text-white">{testimonial.name}</h4>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">{testimonial.role}</p>
                   </div>
                 </div>
               </CardContent>

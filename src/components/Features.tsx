@@ -43,14 +43,14 @@ export const Features = () => {
   ];
 
   return (
-    <section id="recursos" className="py-20 bg-gray-50">
+    <section id="recursos" className="py-20 bg-slate-50 dark:bg-slate-950 transition-colors">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">RECURSOS</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">RECURSOS</h2>
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
             Tudo o que você precisa para controlar suas finanças
           </p>
-          <p className="text-gray-500 mt-4">
+          <p className="text-slate-500 dark:text-slate-400 mt-4">
             Conheça as principais funcionalidades que tornam o Organiza-AI a melhor escolha para gerenciar suas finanças pessoais.
           </p>
         </div>

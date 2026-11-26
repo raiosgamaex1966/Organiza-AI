@@ -1,12 +1,12 @@
 import { MessageCircle, Mail, Phone } from "lucide-react";
 import { OAIIcon } from "@/components/OAIIcon";
 export const Footer = () => {
-  return <footer className="bg-gray-900 text-white py-12">
+  return <footer id="contato" className="bg-slate-950 text-white py-12 border-t border-slate-800">
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center space-x-2 mb-6">
-            <div className="bg-orange-500 rounded-lg p-2">
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-2">
               <OAIIcon className="w-8 h-8" />
             </div>
             <span className="text-2xl font-bold">Organiza-AI</span>

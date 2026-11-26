@@ -22,11 +22,13 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./App.css";
 
 function App() {
   return (
-    <Router>
+    <ThemeProvider defaultTheme="system" storageKey="organiza-ai-theme">
+      <Router>
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/" element={<Index />} />
@@ -180,6 +182,7 @@ function App() {
         <Toaster />
       </div>
     </Router>
+    </ThemeProvider>
   );
 }
 
