@@ -84,6 +84,24 @@ Deno.serve(async (req) => {
     let sentReminders = 0;
     let sentSummaries = 0;
 
+    // Alerta de uso do banco (>= 75% de 500 MB) para o Admin
+    try {
+      const { data: dbSizeBytes } = await adminClient.rpc("get_db_size_bytes");
+      const usedMb = Math.round(((Number(dbSizeBytes || 0) / (1024 * 1024)) * 100)) / 100;
+      const percent = Math.round((usedMb / 500) * 1000) / 10;
+      if (percent >= 75) {
+        await sendWhatsApp(
+          evoUrl,
+          evoKey,
+          fallbackInstance,
+          "5522992142782@s.whatsapp.net",
+          `⚠️ *Alerta de Capacidade Supabase*\n\nO banco de dados do Organiza-AI atingiu *${percent}%* do limite gratuito (*${usedMb} MB de 500 MB*).\nConsidere fazer upgrade para o plano Pro ou migrar para VPS.`
+        );
+      }
+    } catch (e) {
+      console.warn("[NOTIFY] DB size check warning:", e);
+    }
+
     for (const prof of profiles || []) {
       const remoteJid = normalizeWhatsAppNumber(prof.telefone || "");
       if (!remoteJid) continue;

@@ -49,6 +49,7 @@ export default function Admin() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [plans, setPlans] = useState<PlanRow[]>([]);
   const [asaasWebhookUrl, setAsaasWebhookUrl] = useState("");
+  const [dbUsage, setDbUsage] = useState<{ used_mb: number; limit_mb: number; percent: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [updatingUser, setUpdatingUser] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export default function Admin() {
     setSubscribers(data.data.subscribers || []);
     setPlans(data.data.plans || []);
     setAsaasWebhookUrl(data.data.asaas_webhook_url || "");
+    setDbUsage(data.data.db_usage || null);
     setLoading(false);
   }, []);
 
@@ -207,6 +209,33 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Medidor de Uso do Banco Supabase */}
+        {dbUsage && (
+          <Card className={dbUsage.percent >= 75 ? "border-amber-400 bg-amber-50/40 dark:bg-amber-950/20" : ""}>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Uso do Banco de Dados (Supabase)</CardTitle>
+              <Badge variant={dbUsage.percent >= 75 ? "destructive" : "secondary"}>
+                {dbUsage.used_mb} MB / {dbUsage.limit_mb} MB ({dbUsage.percent}%)
+              </Badge>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    dbUsage.percent >= 75 ? "bg-amber-500" : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min(dbUsage.percent, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {dbUsage.percent >= 75
+                  ? "⚠️ Atenção: acima de 75% do plano gratuito. Alerta automático configurado para o seu WhatsApp."
+                  : "Capacidade saudável. Se atingir 75%, você receberá um alerta automático no WhatsApp (22992142782)."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Webhook Asaas */}
         {asaasWebhookUrl && (

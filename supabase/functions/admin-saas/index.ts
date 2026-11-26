@@ -52,13 +52,18 @@ Deno.serve(async (req) => {
     const action = body._action || "dashboard";
 
     if (action === "dashboard") {
-      const [{ data: usersData }, { data: profiles }, { data: subscriptions }, { data: plans }] =
+      const [{ data: usersData }, { data: profiles }, { data: subscriptions }, { data: plans }, { data: dbSizeBytes }] =
         await Promise.all([
           adminClient.auth.admin.listUsers({ perPage: 500 }),
           adminClient.from("profiles").select("user_id, name, telefone, organization_name"),
           adminClient.from("subscriptions").select("*, plans(id, name, price_cents, billing_cycle)"),
           adminClient.from("plans").select("*").order("price_cents", { ascending: true }),
+          adminClient.rpc("get_db_size_bytes"),
         ]);
+
+      const usedMb = Math.round(((Number(dbSizeBytes || 0) / (1024 * 1024)) * 100)) / 100;
+      const limitMb = 500;
+      const dbPercent = Math.min(Math.round((usedMb / limitMb) * 1000) / 10, 100);
 
       const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
       const subMap = new Map((subscriptions || []).map((s: any) => [s.user_id, s]));
@@ -82,6 +87,7 @@ Deno.serve(async (req) => {
           subscribers,
           plans: plans || [],
           asaas_webhook_url: `${supabaseUrl}/functions/v1/asaas-webhook`,
+          db_usage: { used_mb: usedMb, limit_mb: limitMb, percent: dbPercent },
         },
       });
     }
