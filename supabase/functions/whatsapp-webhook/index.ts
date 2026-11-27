@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const BOT_REPLY_PREFIXES = ["✅", "📊", "❌"];
+const BOT_REPLY_PREFIXES = ["✅", "📊", "❌", "🤖", "👋"];
 
 function formatBRL(value: number): string {
   return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -317,7 +317,52 @@ Mensagem: "${text}"`;
   return json.choices?.[0]?.message?.content || null;
 }
 
-async function resolveUserId(adminClient: any, remoteJid: string, fallbackUserId: string): Promise<string> {
+async function salesBotReply(visitorMessage: string, openAiKey: string): Promise<string> {
+  const fallback =
+    "👋 Olá! Sou o assistente do *Organiza-AI*.\n\nCom o Organiza-AI você controla despesas, receitas, parcelamentos e lembretes direto pelo WhatsApp (por texto, áudio ou foto de recibo)!\n\n💎 *Planos:*\n• 7 dias grátis para testar\n• Plano Mensal: R$ 29,90/mês\n• Plano Anual: R$ 297,00/ano\n\n🚀 Teste agora mesmo usando nossa *Conta Demonstração* em 1 clique:\nhttps://organiza-ai-roan.vercel.app/login";
+
+  if (!openAiKey) return fallback;
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${openAiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.5,
+        max_tokens: 350,
+        messages: [
+          {
+            role: "system",
+            content: `Você é o consultor de vendas oficial do Organiza-AI no WhatsApp.
+Responda de forma simpática, objetiva e persuasiva (em português do Brasil, usando no máximo 6-8 linhas).
+Informações do produto:
+- Nome: Organiza-AI (controle financeiro pessoal e empresarial com IA no WhatsApp e Painel Web).
+- Recursos: lança receitas e despesas por texto, áudio ou foto de recibo/nota fiscal; parcelamento automático ("10x de 200"); consulta/cancelamento de lembretes e contas a vencer; aviso diário às 08h no WhatsApp; resumo financeiro mensal todo dia 1º; alerta de orçamento por categoria (80%+); app instalável no celular (PWA) com tema Claro e Escuro; gestão de metas, dívidas, mercado e veículos.
+- Privacidade: cada usuário tem seus dados isolados e criptografados no próprio painel.
+- Planos: 7 dias grátis para testar; Plano Mensal R$ 29,90/mês; Plano Anual R$ 297,00/ano (2 meses grátis).
+- Sempre direcione o visitante para testar imediatamente na Conta Demonstração (1 clique, sem precisar cadastrar) ou criar a conta grátis em: https://organiza-ai-roan.vercel.app/login
+Comece sempre sua resposta com "👋 " ou "🤖 ".`,
+          },
+          { role: "user", content: visitorMessage || "Quero saber como funciona o Organiza-AI" },
+        ],
+      }),
+    });
+
+    if (!res.ok) return fallback;
+    const json = await res.json();
+    const reply = json.choices?.[0]?.message?.content?.trim();
+    if (!reply) return fallback;
+    return BOT_REPLY_PREFIXES.some((p) => reply.startsWith(p)) ? reply : `🤖 ${reply}`;
+  } catch {
+    return fallback;
+  }
+}
+
+async function resolveUserId(adminClient: any, remoteJid: string): Promise<string | null> {
   const rawDigits = remoteJid.split("@")[0].split(":")[0].replace(/\D/g, "");
   const without55 = rawDigits.startsWith("55") ? rawDigits.slice(2) : rawDigits;
 
@@ -337,7 +382,7 @@ async function resolveUserId(adminClient: any, remoteJid: string, fallbackUserId
     if (data?.user_id) return data.user_id;
   }
 
-  return fallbackUserId;
+  return null;
 }
 
 async function resolveCategoryId(
@@ -529,6 +574,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    const userId = await resolveUserId(adminClient, remoteJid);
+
+    // Se o telefone NÃO estiver cadastrado em profiles -> entra no Modo Robô de Vendas
+    if (!userId) {
+      let visitorMsg = textContent.trim();
+      if (!visitorMsg && (msgData?.messageType === "audioMessage" || innerMsg?.audioMessage)) {
+        const rawB64 = await fetchMediaBase64(evoUrl, evoKey, evoInstanceName, msgData, innerMsg, payload);
+        if (rawB64) {
+          const { b64, mime } = cleanBase64(rawB64);
+          const mimeHint = innerMsg?.audioMessage?.mimetype || mime || "audio/ogg";
+          visitorMsg = (await transcribeAudioWithOpenAI(b64, mimeHint, openAiKey)) || "";
+        }
+      }
+      const salesReply = await salesBotReply(visitorMsg, openAiKey);
+      await sendWhatsAppText(evoUrl, evoKey, evoInstanceName, remoteJid, salesReply);
+      return new Response(JSON.stringify({ ok: true, mode: "sales_bot" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Verifica estado pendente (ex.: usuário digitou "adicionar lembrete" na mensagem anterior)
     const { data: pendingState } = await adminClient
       .from("whatsapp_conversation_state")
@@ -623,8 +688,6 @@ Deno.serve(async (req) => {
     } catch {
       parsed = { acao: "invalido" };
     }
-
-    const userId = await resolveUserId(adminClient, remoteJid, inst.user_id);
 
     // Verifica se o usuário possui assinatura ativa (ou é admin) antes de processar IA
     const [{ data: roleRow }, { data: subRow }] = await Promise.all([

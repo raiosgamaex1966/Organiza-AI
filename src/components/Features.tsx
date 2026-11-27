@@ -17,21 +17,21 @@ export const Features = () => {
       icon: MessageCircle,
       title: "WhatsApp com IA (Texto, Áudio e Recibos)",
       description:
-        "Envie uma mensagem, grave um áudio ou mande foto da nota fiscal/PIX no WhatsApp. Nossa IA lê, categoriza e lança tudo automaticamente.",
+        "Envie texto, áudio ou foto da nota fiscal/PIX no WhatsApp. Errou? É só pedir 'Apagar último gasto' que a IA desfaz na hora.",
       color: "green",
     },
     {
       icon: CreditCard,
-      title: "Parcelamento Automático por Mensagem",
+      title: "Parcelamento e Orçamento Inteligente",
       description:
-        "Falou 'Comprei uma TV em 10x de R$ 200'? O sistema já divide e agenda automaticamente todas as parcelas nos próximos meses.",
+        "Falou 'TV em 10x de 200'? Ele agenda as parcelas mês a mês. Defina limites por categoria e receba alertas ao atingir 80%.",
       color: "blue",
     },
     {
       icon: BellRing,
-      title: "Lembretes Diários às 08h no WhatsApp",
+      title: "Lembretes e Dívidas no WhatsApp",
       description:
-        "Receba avisos automáticos toda manhã sobre contas e dívidas que vencem no dia, além de sinal sonoro em tempo real no painel.",
+        "Crie, consulte ou cancele lembretes por texto, áudio ou foto, e receba avisos automáticos às 08h do que vence no dia.",
       color: "yellow",
     },
     {
