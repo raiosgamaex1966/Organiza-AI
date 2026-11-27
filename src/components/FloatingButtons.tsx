@@ -24,7 +24,7 @@ export const FloatingButtons = () => {
 
   const openWhatsApp = () => {
     window.open(
-      "https://wa.me/5522992142782?text=Olá!%20Tenho%20dúvidas%20sobre%20o%20Organiza-AI%20e%20gostaria%20de%20testar.",
+      "https://wa.me/5522992145984?text=Olá!%20Tenho%20dúvidas%20sobre%20o%20Organiza-AI%20e%20gostaria%20de%20testar.",
       "_blank"
     );
   };

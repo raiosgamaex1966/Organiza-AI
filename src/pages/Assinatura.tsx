@@ -21,7 +21,7 @@ export default function Assinatura() {
       window.open(urlWithRef, "_blank", "noopener,noreferrer");
     } else {
       window.open(
-        "https://wa.me/5511999999999?text=Olá!%20Gostaria%20de%20ativar%20minha%20assinatura%20do%20Organiza-AI.",
+        "https://wa.me/5522992145984?text=Olá!%20Gostaria%20de%20ativar%20minha%20assinatura%20do%20Organiza-AI.",
         "_blank",
         "noopener,noreferrer"
       );

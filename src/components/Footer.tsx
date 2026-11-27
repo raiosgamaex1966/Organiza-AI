@@ -39,7 +39,7 @@ export const Footer = () => {
           <div className="space-y-4 text-gray-400">
             <div className="flex items-center space-x-3">
               <MessageCircle className="w-5 h-5" />
-              <span>WhatsApp: (22) 99214-2782</span>
+              <span>WhatsApp: (22) 99214-5984</span>
             </div>
             <div className="flex items-center space-x-3">
               <Mail className="w-5 h-5" />
