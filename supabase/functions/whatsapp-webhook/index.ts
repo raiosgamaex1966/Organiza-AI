@@ -277,7 +277,20 @@ Analise a mensagem do usuário e responda APENAS com um JSON válido:
   "termo": "palavra-chave principal do lembrete"
 }
 
-8) Se não for possível identificar valor/descrição, consulta nem lembrete:
+8) Se o usuário perguntar pelos seus lembretes, contas a vencer ou dívidas (ex: "quais são meus lembretes", "o que vence essa semana", "minhas dívidas"):
+{ "acao": "consultar_lembretes_dividas" }
+
+9) Se o usuário pedir para apagar/desfazer o último lançamento, gasto ou receita (ex: "apagar último gasto", "desfazer último lançamento", "excluir última despesa"):
+{ "acao": "desfazer_ultimo" }
+
+10) Se o usuário pedir para definir um orçamento/limite mensal para uma categoria de despesa (ex: "definir orçamento de Alimentação em 800", "limite de Transporte 500"):
+{
+  "acao": "definir_orcamento",
+  "categoria": "nome da categoria",
+  "valor": número (ex: 800)
+}
+
+11) Se não for possível identificar nenhuma das opções acima:
 { "acao": "invalido" }
 
 Mensagem: "${text}"`;
@@ -332,30 +345,30 @@ async function resolveCategoryId(
   userId: string,
   tipo: "receita" | "despesa",
   categoryName: string
-): Promise<{ id: string | null; nome: string }> {
+): Promise<{ id: string | null; nome: string; orcamento_mensal: number | null }> {
   const { data: cats } = await adminClient
     .from("categorias")
-    .select("id, nome, tipo")
+    .select("id, nome, tipo, orcamento_mensal")
     .eq("user_id", userId)
     .eq("tipo", tipo);
 
   if (!cats || cats.length === 0) {
-    return { id: null, nome: categoryName || "Outros" };
+    return { id: null, nome: categoryName || "Outros", orcamento_mensal: null };
   }
 
   const target = (categoryName || "").toLowerCase().trim();
   const exact = cats.find((c: any) => c.nome.toLowerCase() === target);
-  if (exact) return { id: exact.id, nome: exact.nome };
+  if (exact) return { id: exact.id, nome: exact.nome, orcamento_mensal: exact.orcamento_mensal ? Number(exact.orcamento_mensal) : null };
 
   const partial = cats.find(
     (c: any) => c.nome.toLowerCase().includes(target) || target.includes(c.nome.toLowerCase())
   );
-  if (partial) return { id: partial.id, nome: partial.nome };
+  if (partial) return { id: partial.id, nome: partial.nome, orcamento_mensal: partial.orcamento_mensal ? Number(partial.orcamento_mensal) : null };
 
   const outros = cats.find((c: any) => c.nome.toLowerCase() === "outros");
-  if (outros) return { id: outros.id, nome: outros.nome };
+  if (outros) return { id: outros.id, nome: outros.nome, orcamento_mensal: outros.orcamento_mensal ? Number(outros.orcamento_mensal) : null };
 
-  return { id: cats[0].id, nome: cats[0].nome };
+  return { id: cats[0].id, nome: cats[0].nome, orcamento_mensal: cats[0].orcamento_mensal ? Number(cats[0].orcamento_mensal) : null };
 }
 
 async function sumMonth(
@@ -643,7 +656,7 @@ Deno.serve(async (req) => {
       const valor = Math.round(Number(parsed.valor) * 100) / 100;
       const parcelas = Math.min(Math.max(parseInt(parsed.parcelas || "1", 10) || 1, 1), 36);
       const baseDate = new Date((parsed.data || todayISO()) + "T12:00:00Z");
-      const { id: categoriaId, nome: categoriaNome } = await resolveCategoryId(
+      const { id: categoriaId, nome: categoriaNome, orcamento_mensal: orcamentoMensal } = await resolveCategoryId(
         adminClient,
         userId,
         tipo,
@@ -679,12 +692,30 @@ Deno.serve(async (req) => {
         );
       } else {
         const labelTipo = tipo === "receita" ? "Receita" : "Despesa";
+        let budgetAlert = "";
+
+        if (tipo === "despesa" && categoriaId && orcamentoMensal && orcamentoMensal > 0) {
+          const { start, end } = monthRangeISO();
+          const { data: catRows } = await adminClient
+            .from("despesas")
+            .select("valor")
+            .eq("user_id", userId)
+            .eq("categoria_id", categoriaId)
+            .gte("data", start)
+            .lte("data", end);
+          const totalCat = (catRows || []).reduce((acc: number, r: any) => acc + Number(r.valor || 0), 0);
+          const pct = Math.round((totalCat / orcamentoMensal) * 100);
+          if (pct >= 80) {
+            budgetAlert = `\n\n⚠️ Atenção: você já usou *${pct}%* do seu orçamento de *${categoriaNome}* este mês (R$ ${formatBRL(totalCat)} de R$ ${formatBRL(orcamentoMensal)}).`;
+          }
+        }
+
         await sendWhatsAppText(
           evoUrl,
           evoKey,
           evoInstanceName,
           remoteJid,
-          `✅ ${labelTipo} registrada${parcelas > 1 ? ` (${parcelas}x)` : ""}:\n📝 ${parsed.descricao}\n💰 R$ ${formatBRL(valor)}${parcelas > 1 ? " /mês" : ""}\n🏷️ ${categoriaNome}`
+          `✅ ${labelTipo} registrada${parcelas > 1 ? ` (${parcelas}x)` : ""}:\n📝 ${parsed.descricao}\n💰 R$ ${formatBRL(valor)}${parcelas > 1 ? " /mês" : ""}\n🏷️ ${categoriaNome}${budgetAlert}`
         );
       }
     } else if (parsed.acao === "pedir_lembrete") {
@@ -776,6 +807,95 @@ Deno.serve(async (req) => {
           evoInstanceName,
           remoteJid,
           `❌ Não encontrei um lembrete com "${termo}". Seus lembretes ativos:\n${lista}`
+        );
+      }
+    } else if (parsed.acao === "consultar_lembretes_dividas") {
+      const [{ data: lembs }, { data: divs }] = await Promise.all([
+        adminClient
+          .from("lembretes")
+          .select("titulo, data, hora")
+          .eq("user_id", userId)
+          .eq("concluido", false)
+          .order("data", { ascending: true })
+          .limit(10),
+        adminClient
+          .from("dividas")
+          .select("descricao, valor_restante, data_vencimento, status")
+          .eq("user_id", userId)
+          .in("status", ["pendente", "vencida"])
+          .order("data_vencimento", { ascending: true })
+          .limit(10),
+      ]);
+
+      const lembText = (lembs && lembs.length > 0)
+        ? lembs.map((l: any) => `• ${l.titulo} (${l.data.split("-").reverse().join("/")}${l.hora ? ` às ${String(l.hora).slice(0, 5)}` : ""})`).join("\n")
+        : "Nenhum lembrete pendente.";
+
+      const divText = (divs && divs.length > 0)
+        ? divs.map((d: any) => `• ${d.descricao}: R$ ${formatBRL(Number(d.valor_restante || 0))} (vence ${d.data_vencimento.split("-").reverse().join("/")})`).join("\n")
+        : "Nenhuma dívida/conta pendente.";
+
+      await sendWhatsAppText(
+        evoUrl,
+        evoKey,
+        evoInstanceName,
+        remoteJid,
+        `📊 *Seus Lembretes e Contas:*\n\n🔔 *Lembretes:*\n${lembText}\n\n💳 *Contas/Dívidas a vencer:*\n${divText}`
+      );
+    } else if (parsed.acao === "desfazer_ultimo") {
+      const [{ data: lastDesp }, { data: lastRec }] = await Promise.all([
+        adminClient
+          .from("despesas")
+          .select("id, descricao, valor, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        adminClient
+          .from("receitas")
+          .select("id, descricao, valor, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      let target: { table: "despesas" | "receitas"; row: any } | null = null;
+      if (lastDesp && lastRec) {
+        target = new Date(lastDesp.created_at) >= new Date(lastRec.created_at)
+          ? { table: "despesas", row: lastDesp }
+          : { table: "receitas", row: lastRec };
+      } else if (lastDesp) {
+        target = { table: "despesas", row: lastDesp };
+      } else if (lastRec) {
+        target = { table: "receitas", row: lastRec };
+      }
+
+      if (!target) {
+        await sendWhatsAppText(evoUrl, evoKey, evoInstanceName, remoteJid, "📊 Não encontrei nenhum lançamento recente para apagar.");
+      } else {
+        await adminClient.from(target.table).delete().eq("id", target.row.id).eq("user_id", userId);
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `✅ Último lançamento apagado:\n📝 ${target.row.descricao} (R$ ${formatBRL(Number(target.row.valor || 0))})`
+        );
+      }
+    } else if (parsed.acao === "definir_orcamento" && Number(parsed.valor) > 0 && parsed.categoria) {
+      const { id: catId, nome: catNome } = await resolveCategoryId(adminClient, userId, "despesa", parsed.categoria);
+      if (!catId) {
+        await sendWhatsAppText(evoUrl, evoKey, evoInstanceName, remoteJid, "❌ Não encontrei essa categoria de despesa.");
+      } else {
+        const limite = Math.round(Number(parsed.valor) * 100) / 100;
+        await adminClient.from("categorias").update({ orcamento_mensal: limite }).eq("id", catId);
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `✅ Orçamento mensal definido:\n🏷️ ${catNome}: R$ ${formatBRL(limite)}\n\nVou te avisar quando seus gastos atingirem 80% deste limite.`
         );
       }
     } else if (parsed.acao === "consultar_despesas") {
