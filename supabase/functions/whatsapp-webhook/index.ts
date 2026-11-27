@@ -186,7 +186,7 @@ async function analyzeImageWithOpenAI(
   "descricao": "descrição clara da transação",
   "valor": número (apenas número, ex: 150.50),
   "categoria": "Alimentação | Transporte | Moradia | Saúde | Educação | Lazer | Roupas | Tecnologia | Serviços | Salário | Freelance | Investimentos | Vendas | Aluguel Recebido | Outros",
-  "data": "YYYY-MM-DD (se não visível, use ${todayISO()})"
+  "data": "${todayISO()}"
 }`;
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
