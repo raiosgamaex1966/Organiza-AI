@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Key, Brain, FileText, Settings, Check, AlertCircle, X, FileUp, Edit, Trash2 } from "lucide-react";
+import { Upload, Key, Brain, FileText, Settings, Check, AlertCircle, X, FileUp, Edit, Trash2, Camera } from "lucide-react";
 import { EditarResultadoIAModal } from "@/components/EditarResultadoIAModal";
 import { useToast } from "@/hooks/use-toast";
 import { useIAConfiguracoes } from "@/hooks/useIAConfiguracoes";
@@ -73,7 +73,6 @@ const IA = () => {
 
   const processFiles = (files: FileList) => {
     const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     
     Array.from(files).forEach(file => {
       if (file.size > maxSize) {
@@ -85,7 +84,10 @@ const IA = () => {
         return;
       }
 
-      if (!allowedTypes.includes(file.type)) {
+      const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic)$/i.test(file.name);
+      const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+
+      if (!isImage && !isPdf) {
         toast({
           title: "Tipo de arquivo não suportado",
           description: `${file.name} não é um tipo de arquivo suportado.`,
@@ -95,7 +97,7 @@ const IA = () => {
       }
 
       const fileId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-      const fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+      const fileType = isImage ? 'image' : 'pdf';
       
       const uploadedFile: UploadedFile = {
         id: fileId,
@@ -460,7 +462,7 @@ Responda APENAS com o JSON, sem explicações adicionais.`;
               )}
 
               <div 
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-6 md:p-8 text-center transition-colors ${
                   dragOver 
                     ? 'border-blue-400 bg-blue-50' 
                     : 'border-gray-300 hover:border-gray-400'
@@ -478,15 +480,46 @@ Responda APENAS com o JSON, sem explicações adicionais.`;
                   id="file-upload"
                   disabled={isAnalyzing}
                 />
-                <label htmlFor="file-upload" className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="camera-upload"
+                  disabled={isAnalyzing}
+                />
+                <label htmlFor="file-upload" className="cursor-pointer block">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-lg font-medium text-gray-700 mb-2">
                     Clique ou arraste arquivos aqui
                   </p>
                   <p className="text-sm text-gray-500">
-                    Aceita imagens (PNG, JPG, GIF) e arquivos PDF até 10MB
+                    Aceita imagens (PNG, JPG, GIF, WEBP) e arquivos PDF até 10MB
                   </p>
                 </label>
+
+                <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isAnalyzing}
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                    className="w-full sm:w-auto"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Escolher Arquivo
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={isAnalyzing}
+                    onClick={() => document.getElementById('camera-upload')?.click()}
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Tirar Foto (Câmera)
+                  </Button>
+                </div>
               </div>
 
               {uploadedFiles.length > 0 && (
