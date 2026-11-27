@@ -271,7 +271,13 @@ Analise a mensagem do usuário e responda APENAS com um JSON válido:
   "prioridade": "baixa | media | alta"
 }
 
-7) Se não for possível identificar valor/descrição, consulta nem lembrete:
+7) Se o usuário quiser cancelar, excluir ou remover um lembrete existente (ex: "cancelar lembrete de pegar Guilherme", "excluir lembrete da conta de luz"):
+{
+  "acao": "cancelar_lembrete",
+  "termo": "palavra-chave principal do lembrete"
+}
+
+8) Se não for possível identificar valor/descrição, consulta nem lembrete:
 { "acao": "invalido" }
 
 Mensagem: "${text}"`;
@@ -727,6 +733,49 @@ Deno.serve(async (req) => {
           evoInstanceName,
           remoteJid,
           `✅ Lembrete agendado:\n🔔 ${parsed.titulo}\n📅 ${d}/${m}/${y} às ${horaLembrete}`
+        );
+      }
+    } else if (parsed.acao === "cancelar_lembrete") {
+      const termo = String(parsed.termo || "").trim();
+      const { data: openReminders } = await adminClient
+        .from("lembretes")
+        .select("id, titulo, data, hora")
+        .eq("user_id", userId)
+        .eq("concluido", false)
+        .order("data", { ascending: true });
+
+      const match = (openReminders || []).find((r: any) =>
+        termo ? r.titulo.toLowerCase().includes(termo.toLowerCase()) : false
+      );
+
+      if (match) {
+        await adminClient.from("lembretes").delete().eq("id", match.id).eq("user_id", userId);
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `✅ Lembrete cancelado:\n🔔 ${match.titulo}`
+        );
+      } else if (!openReminders || openReminders.length === 0) {
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          "📊 Você não tem nenhum lembrete pendente no momento."
+        );
+      } else {
+        const lista = openReminders
+          .slice(0, 5)
+          .map((r: any) => `• ${r.titulo} (${r.data.split("-").reverse().join("/")})`)
+          .join("\n");
+        await sendWhatsAppText(
+          evoUrl,
+          evoKey,
+          evoInstanceName,
+          remoteJid,
+          `❌ Não encontrei um lembrete com "${termo}". Seus lembretes ativos:\n${lista}`
         );
       }
     } else if (parsed.acao === "consultar_despesas") {
