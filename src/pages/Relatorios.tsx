@@ -88,23 +88,23 @@ const formatarData = (dataString: string) => {
   return `${dia}/${mes}/${ano}`;
 };
 
-// Função para obter a data atual no formato do banco (YYYY-MM-DD)
-const getDataAtual = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+// Função para formatar Date local para YYYY-MM-DD
+const formatLocalYMD = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
     "0"
-  )}-${String(now.getDate()).padStart(2, "0")}`;
+  )}-${String(date.getDate()).padStart(2, "0")}`;
 };
+
+// Função para obter a data atual no formato do banco (YYYY-MM-DD)
+const getDataAtual = () => formatLocalYMD(new Date());
 
 // Função para obter o primeiro dia da semana no formato do banco (YYYY-MM-DD)
 const getPrimeiroDiaSemana = () => {
   const now = new Date();
   const primeiroDiaSemana = new Date(now);
   primeiroDiaSemana.setDate(now.getDate() - now.getDay());
-  return `${primeiroDiaSemana.getFullYear()}-${String(
-    primeiroDiaSemana.getMonth() + 1
-  ).padStart(2, "0")}-${String(primeiroDiaSemana.getDate()).padStart(2, "0")}`;
+  return formatLocalYMD(primeiroDiaSemana);
 };
 
 // Função para obter o primeiro dia do mês no formato do banco (YYYY-MM-DD)
@@ -147,32 +147,31 @@ const Relatorios = () => {
 
     const hoje = getDataAtual();
 
-    // Filtrar transações baseado no período
+    // Filtrar transações baseado no período (comparação em YYYY-MM-DD para evitar bugs de timezone/Date)
+    const now = new Date();
     const filteredByPeriod = transacoes.filter((transacao) => {
       const dataTransacao = transacao.data.split("T")[0];
 
-      const now = new Date();
       switch (selectedPeriod) {
         case "semana": {
-          const inicio = getPrimeiroDiaSemana();
-          const fim = new Date(inicio);
-          fim.setDate(fim.getDate() + 6);
-          fim.setHours(23, 59, 59, 999);
-          return dataTransacao >= inicio && dataTransacao <= fim;
+          const inicioDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+          const fimDate = new Date(inicioDate.getFullYear(), inicioDate.getMonth(), inicioDate.getDate() + 6);
+          return dataTransacao >= formatLocalYMD(inicioDate) && dataTransacao <= formatLocalYMD(fimDate);
         }
         case "mes": {
           const inicio = getPrimeiroDiaMes();
-          const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-          return dataTransacao >= inicio && dataTransacao <= fim;
+          const fimDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          return dataTransacao >= inicio && dataTransacao <= formatLocalYMD(fimDate);
         }
         case "trimestre": {
-          const inicio = getPrimeiroDiaTrimestre();
-          const fim = new Date(inicio.getFullYear(), inicio.getMonth() + 3, 0, 23, 59, 59, 999);
-          return dataTransacao >= inicio && dataTransacao <= fim;
+          const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+          const inicioDate = new Date(now.getFullYear(), quarterStartMonth, 1);
+          const fimDate = new Date(now.getFullYear(), quarterStartMonth + 3, 0);
+          return dataTransacao >= formatLocalYMD(inicioDate) && dataTransacao <= formatLocalYMD(fimDate);
         }
         case "ano": {
           const inicio = getPrimeiroDiaAno();
-          const fim = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+          const fim = `${now.getFullYear()}-12-31`;
           return dataTransacao >= inicio && dataTransacao <= fim;
         }
         default:
@@ -507,7 +506,7 @@ const Relatorios = () => {
             </CardHeader>
             <CardContent>
               <div className="text-lg md:text-2xl font-bold text-green-600">
-                R$ {totalReceitas.toLocaleString("pt-BR")}
+                R$ {totalReceitas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <p className="text-xs text-muted-foreground">
                 Período: {selectedPeriod}
@@ -523,7 +522,7 @@ const Relatorios = () => {
             </CardHeader>
             <CardContent>
               <div className="text-lg md:text-2xl font-bold text-red-600">
-                R$ {totalDespesas.toLocaleString("pt-BR")}
+                R$ {totalDespesas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <p className="text-xs text-muted-foreground">
                 Período: {selectedPeriod}
@@ -541,7 +540,7 @@ const Relatorios = () => {
                   saldoTotal >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
-                R$ {saldoTotal.toLocaleString("pt-BR")}
+                R$ {saldoTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <p className="text-xs text-muted-foreground">
                 {saldoTotal >= 0 ? "Resultado positivo" : "Resultado negativo"}

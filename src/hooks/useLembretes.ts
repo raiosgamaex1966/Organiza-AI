@@ -134,12 +134,33 @@ export const useLembretes = () => {
 
     useEffect(() => {
         fetchLembretes();
+
+        const channel = supabase
+            .channel("lembretes-realtime")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "lembretes" },
+                () => fetchLembretes()
+            )
+            .subscribe();
+
+        const handleFocus = () => {
+            fetchLembretes();
+        };
+
+        window.addEventListener("focus", handleFocus);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     return {
         lembretes,
         loading,
         fetchLembretes,
+        refetch: fetchLembretes,
         createLembrete,
         updateLembrete,
         deleteLembrete,

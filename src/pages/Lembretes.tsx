@@ -25,6 +25,13 @@ import { useLembretes, Lembrete } from "@/hooks/useLembretes";
 import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 
+const formatLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+};
+
 const Lembretes = () => {
     const { lembretes, loading, createLembrete, updateLembrete, deleteLembrete } = useLembretes();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -70,7 +77,7 @@ const Lembretes = () => {
         setFormData({
             titulo: "",
             descricao: "",
-            data: selectedDate ? selectedDate.toISOString().split('T')[0] : "",
+            data: selectedDate ? formatLocalYMD(selectedDate) : "",
             hora: "",
             prioridade: "media",
         });
@@ -119,7 +126,7 @@ const Lembretes = () => {
     });
 
     const lembretesDoDia = selectedDate
-        ? lembretesOrdenados.filter(l => l.data === selectedDate.toISOString().split('T')[0])
+        ? lembretesOrdenados.filter(l => l.data === formatLocalYMD(selectedDate))
         : [];
 
     return (
