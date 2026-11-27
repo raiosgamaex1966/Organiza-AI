@@ -118,18 +118,29 @@ const Dashboard = () => {
 
     const hoje = getDataAtual();
 
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const toYMD = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
     const transacoesFiltradas = transacoes.filter((transacao) => {
       const dataTransacao = transacao.data.split("T")[0];
 
       switch (selectedPeriod) {
         case "dia":
           return dataTransacao === hoje;
-        case "semana":
-          return dataTransacao >= getPrimeiroDiaSemana();
-        case "mes":
-          return dataTransacao >= getPrimeiroDiaMes();
+        case "semana": {
+          const inicio = getPrimeiroDiaSemana();
+          const dFim = new Date(now);
+          dFim.setDate(now.getDate() + (6 - now.getDay()));
+          return dataTransacao >= inicio && dataTransacao <= toYMD(dFim);
+        }
+        case "mes": {
+          const inicio = getPrimeiroDiaMes();
+          const dFim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          return dataTransacao >= inicio && dataTransacao <= toYMD(dFim);
+        }
         case "ano":
-          return dataTransacao >= getPrimeiroDiaAno();
+          return dataTransacao >= getPrimeiroDiaAno() && dataTransacao <= `${now.getFullYear()}-12-31`;
         default:
           return true;
       }
