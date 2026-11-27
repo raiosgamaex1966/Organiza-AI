@@ -181,7 +181,7 @@ function App() {
           <Route
             path="/whatsapp"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin>
                 <WhatsApp />
               </ProtectedRoute>
             }

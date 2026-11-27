@@ -59,8 +59,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Users, label: "Perfil", path: "/perfil" },
     { icon: Bot, label: "IA", path: "/ia" },
     { icon: MessageSquare, label: "Assistente IA", path: "/assistente-openai" },
-    { icon: Smartphone, label: "WhatsApp", path: "/whatsapp" },
-    ...(isAdmin ? [{ icon: ShieldCheck, label: "Admin SaaS", path: "/admin" }] : []),
+    ...(isAdmin
+      ? [
+          { icon: Smartphone, label: "WhatsApp Evolution", path: "/whatsapp" },
+          { icon: ShieldCheck, label: "Admin SaaS", path: "/admin" },
+        ]
+      : []),
   ];
 
   const handleLogout = () => {
