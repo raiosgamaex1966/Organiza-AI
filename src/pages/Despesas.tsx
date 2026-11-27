@@ -65,6 +65,7 @@ const Despesas = () => {
 
   const [filtro, setFiltro] = useState("");
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
+  const [mesFiltro, setMesFiltro] = useState(() => new Date().toISOString().slice(0, 7));
 
   // Estados para o modal de edição
   const [despesaEditando, setDespesaEditando] = useState<Despesa | null>(null);
@@ -146,12 +147,18 @@ const Despesas = () => {
         .includes(filtro.toLowerCase());
       const matchCategoria =
         categoriaFiltro === "" || despesa.categorias?.nome === categoriaFiltro;
-      return matchDescricao && matchCategoria;
+      const matchMes =
+        mesFiltro === "" || (despesa.data || "").startsWith(mesFiltro);
+      return matchDescricao && matchCategoria && matchMes;
     })
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
-  const totalDespesas = despesas.reduce(
-    (total, despesa) => total + despesa.valor,
+  const despesasParceladas = despesas
+    .filter((despesa) => /\(\d+\/\d+\)$/.test(despesa.descricao || ""))
+    .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+
+  const totalDespesas = despesasFiltradas.reduce(
+    (total, despesa) => total + Number(despesa.valor || 0),
     0
   );
   const categorias = categoriasDespesa.map((c) => c.nome);
@@ -159,6 +166,7 @@ const Despesas = () => {
   const limparFiltros = () => {
     setFiltro("");
     setCategoriaFiltro("");
+    setMesFiltro(new Date().toISOString().slice(0, 7));
   };
 
   return (
@@ -239,9 +247,12 @@ const Despesas = () => {
           onValueChange={setActiveTab}
           className="space-y-4 md:space-y-6"
         >
-          <TabsList className="w-full grid grid-cols-2 sm:w-auto sm:inline-flex">
+          <TabsList className="w-full grid grid-cols-3 sm:w-auto sm:inline-flex">
             <TabsTrigger value="lista" className="text-sm">
-              Lista de Despesas
+              Despesas do Mês
+            </TabsTrigger>
+            <TabsTrigger value="parcelados" className="text-sm">
+              Parcelados ({despesasParceladas.length})
             </TabsTrigger>
             <TabsTrigger value="adicionar" className="text-sm">
               Adicionar Despesa
@@ -265,6 +276,23 @@ const Despesas = () => {
                   />
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
+                  <Input
+                    type="month"
+                    value={mesFiltro}
+                    onChange={(e) => setMesFiltro(e.target.value)}
+                    className="w-full sm:w-44"
+                    title="Filtrar por mês"
+                  />
+                  <Button
+                    type="button"
+                    variant={mesFiltro === "" ? "default" : "outline"}
+                    onClick={() =>
+                      setMesFiltro(mesFiltro === "" ? new Date().toISOString().slice(0, 7) : "")
+                    }
+                    className="w-full sm:w-auto"
+                  >
+                    {mesFiltro === "" ? "Vendo todos os meses" : "Ver todos os meses"}
+                  </Button>
                   <select
                     id="categoria-filtro"
                     title="Filtrar por categoria"
@@ -476,6 +504,49 @@ const Despesas = () => {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="parcelados" className="space-y-4">
+            <Card className="p-4 md:p-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Compras Parceladas por Mês
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Acompanhe todas as parcelas futuras separadas mês a mês. Na aba "Despesas do Mês" entra apenas a parcela referente ao mês selecionado.
+                </p>
+              </div>
+              {despesasParceladas.length === 0 ? (
+                <p className="text-sm text-gray-500 py-8 text-center">
+                  Nenhuma compra parcelada encontrada. Experimente enviar no WhatsApp: "Comprei uma TV em 10x de 200".
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Mês / Vencimento</TableHead>
+                      <TableHead>Descrição / Parcela</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead className="text-right">Valor da Parcela</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {despesasParceladas.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>
+                          {new Date(`${p.data}T12:00:00`).toLocaleDateString("pt-BR")}
+                        </TableCell>
+                        <TableCell className="font-medium">{p.descricao}</TableCell>
+                        <TableCell>{p.categorias?.nome || "Sem categoria"}</TableCell>
+                        <TableCell className="text-right font-semibold text-red-600">
+                          R$ {Number(p.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Card>
           </TabsContent>
 
           <TabsContent value="adicionar">

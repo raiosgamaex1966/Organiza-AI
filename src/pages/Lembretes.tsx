@@ -314,7 +314,7 @@ const Lembretes = () => {
                                                     <div className="flex items-center gap-4 mt-3">
                                                         <div className="flex items-center gap-1 text-sm text-gray-600">
                                                             <CalendarIcon className="h-4 w-4" />
-                                                            {new Date(lembrete.data).toLocaleDateString(
+                                                            {new Date(`${lembrete.data}T12:00:00`).toLocaleDateString(
                                                                 "pt-BR"
                                                             )}
                                                             {lembrete.hora && ` às ${lembrete.hora}`}

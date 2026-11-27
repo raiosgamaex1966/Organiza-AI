@@ -459,8 +459,18 @@ Deno.serve(async (req) => {
     const msgData = payload.data;
     const rawRemoteJid: string = msgData?.key?.remoteJid || "";
     const remoteJid: string = msgData?.key?.remoteJidAlt || rawRemoteJid;
+
     if (!remoteJid || remoteJid.endsWith("@g.us") || remoteJid === "status@broadcast") {
       return new Response(JSON.stringify({ ok: true, ignored: "group/status" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Evita processamento duplicado quando o usuário envia de uma instância conectada para outra
+    const cleanTargetPhone = remoteJid.split("@")[0].split(":")[0].replace(/\D/g, "");
+    const cleanInstPhone = (inst.phone || "").replace(/\D/g, "");
+    if (msgData?.key?.fromMe === true && cleanInstPhone && cleanTargetPhone && cleanInstPhone !== cleanTargetPhone) {
+      return new Response(JSON.stringify({ ok: true, ignored: "outbound_to_other_contact" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
