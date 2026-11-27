@@ -229,8 +229,29 @@ const Dashboard = () => {
     0
   );
 
-  // Preparar transações para exibição (últimas 5)
-  const transacoesParaExibicao = transacoesFiltradas
+  // Preparar transações para exibição (últimas 5, agrupando parcelados em 1 linha com valor total)
+  const transacoesAgrupadas: typeof transacoesFiltradas = [];
+  const vistosParcelados = new Set<string>();
+
+  for (const transacao of transacoesFiltradas) {
+    const match = (transacao.descricao || "").match(/^(.+?)\s*\((\d+)\/(\d+)\)$/);
+    if (match) {
+      const baseDesc = match[1].trim();
+      const totalParcelas = Number(match[3]);
+      const groupKey = `${transacao.tipo}::${baseDesc.toLowerCase()}::${totalParcelas}`;
+      if (vistosParcelados.has(groupKey)) continue;
+      vistosParcelados.add(groupKey);
+      transacoesAgrupadas.push({
+        ...transacao,
+        descricao: `${baseDesc} em ${totalParcelas} parcelas`,
+        valor: Number(transacao.valor) * totalParcelas,
+      });
+    } else {
+      transacoesAgrupadas.push(transacao);
+    }
+  }
+
+  const transacoesParaExibicao = transacoesAgrupadas
     .slice(0, 5)
     .map((transacao) => ({
       id: transacao.id,
