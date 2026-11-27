@@ -379,14 +379,21 @@ const Relatorios = () => {
         transacoes: filteredTransactions,
       };
 
-      // Criar CSV das transações
-      const csvHeader = "Data,Descrição,Categoria,Valor,Tipo\n";
+      // Criar CSV compatível com Excel em Português (UTF-8 BOM + separador ';')
+      const csvHeader = "\uFEFFData;Descrição;Categoria;Valor;Tipo\r\n";
       const csvData = filteredTransactions
-        .map(
-          (transaction) =>
-            `${transaction.data},"${transaction.descricao}","${transaction.categoria}",${transaction.valor},${transaction.tipo}`
-        )
-        .join("\n");
+        .map((transaction) => {
+          const dataBr = transaction.data
+            ? transaction.data.split("-").reverse().join("/")
+            : "";
+          const desc = String(transaction.descricao || "").replace(/"/g, '""');
+          const cat = String(transaction.categoria || "").replace(/"/g, '""');
+          const valorBr = Number(transaction.valor || 0)
+            .toFixed(2)
+            .replace(".", ",");
+          return `${dataBr};"${desc}";"${cat}";${valorBr};${transaction.tipo}`;
+        })
+        .join("\r\n");
 
       const csvContent = csvHeader + csvData;
 
