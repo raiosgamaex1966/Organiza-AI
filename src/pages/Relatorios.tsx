@@ -151,15 +151,30 @@ const Relatorios = () => {
     const filteredByPeriod = transacoes.filter((transacao) => {
       const dataTransacao = transacao.data.split("T")[0];
 
+      const now = new Date();
       switch (selectedPeriod) {
-        case "semana":
-          return dataTransacao >= getPrimeiroDiaSemana();
-        case "mes":
-          return dataTransacao >= getPrimeiroDiaMes();
-        case "trimestre":
-          return dataTransacao >= getPrimeiroDiaTrimestre();
-        case "ano":
-          return dataTransacao >= getPrimeiroDiaAno();
+        case "semana": {
+          const inicio = getPrimeiroDiaSemana();
+          const fim = new Date(inicio);
+          fim.setDate(fim.getDate() + 6);
+          fim.setHours(23, 59, 59, 999);
+          return dataTransacao >= inicio && dataTransacao <= fim;
+        }
+        case "mes": {
+          const inicio = getPrimeiroDiaMes();
+          const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+          return dataTransacao >= inicio && dataTransacao <= fim;
+        }
+        case "trimestre": {
+          const inicio = getPrimeiroDiaTrimestre();
+          const fim = new Date(inicio.getFullYear(), inicio.getMonth() + 3, 0, 23, 59, 59, 999);
+          return dataTransacao >= inicio && dataTransacao <= fim;
+        }
+        case "ano": {
+          const inicio = getPrimeiroDiaAno();
+          const fim = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+          return dataTransacao >= inicio && dataTransacao <= fim;
+        }
         default:
           return true;
       }
